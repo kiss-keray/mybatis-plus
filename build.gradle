@@ -2,7 +2,7 @@ import java.time.LocalDateTime
 
 allprojects {
     group = 'com.baomidou'
-    version = "3.5.1"
+    version = "3.5.1.K"
 }
 
 ext {
@@ -186,8 +186,8 @@ subprojects {
             maven {
                 def userName = System.getProperty("un")
                 def passWord = System.getProperty("ps")
-                def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-                def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+                def releasesRepoUrl = "https://packages.aliyun.com/maven/repository/2010881-release-hOyeRP/"
+                def snapshotsRepoUrl = "https://packages.aliyun.com/maven/repository/2010881-snapshot-JFQB6y/"
                 url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
 
                 credentials {
@@ -226,8 +226,8 @@ subprojects {
                     developers {
                         developer {
                             id = 'baomidou'
-                            name = 'hubin'
-                            email = 'jobob@qq.com'
+                            name = 'keray'
+                            email = 'zkiss-yu@qq.com'
                         }
                     }
 
