@@ -1,13 +1,24 @@
+/*
+ * Copyright (c) 2011-2022, baomidou (jobob@qq.com).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.baomidou.mybatisplus.extension.toolkit;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.core.toolkit.GlobalConfigUtils;
 import com.baomidou.mybatisplus.core.toolkit.LambdaUtils;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import org.apache.ibatis.session.SqlSession;
-import org.mybatis.spring.SqlSessionUtils;
 
 import java.util.*;
 import java.util.function.*;
@@ -109,7 +120,7 @@ public class SimpleQuery {
      * ignore
      */
     @SafeVarargs
-    public static <T, K, D, A, M extends Map<K, D>> M group(LambdaQueryWrapper<T> wrapper, SFunction<T, K> sFunction, Collector<? super T, A, D> downstream, Consumer<T>... peeks) {
+    public static <T, K, D, A> Map<K, D> group(LambdaQueryWrapper<T> wrapper, SFunction<T, K> sFunction, Collector<T, A, D> downstream, Consumer<T>... peeks) {
         return listGroupBy(selectList(getType(sFunction), wrapper), sFunction, downstream, false, peeks);
     }
 
@@ -125,11 +136,10 @@ public class SimpleQuery {
      * @param <K>        实体中的分组依据对应类型，也是Map中key的类型
      * @param <D>        下游操作对应返回类型，也是Map中value的类型
      * @param <A>        下游操作在进行中间操作时对应类型
-     * @param <M>        最后返回结果Map类型
      * @return Map<实体中的属性, List < 实体>>
      */
     @SafeVarargs
-    public static <T, K, D, A, M extends Map<K, D>> M group(LambdaQueryWrapper<T> wrapper, SFunction<T, K> sFunction, Collector<? super T, A, D> downstream, boolean isParallel, Consumer<T>... peeks) {
+    public static <T, K, D, A> Map<K, D> group(LambdaQueryWrapper<T> wrapper, SFunction<T, K> sFunction, Collector<T, A, D> downstream, boolean isParallel, Consumer<T>... peeks) {
         return listGroupBy(selectList(getType(sFunction), wrapper), sFunction, downstream, isParallel, peeks);
     }
 
@@ -199,7 +209,7 @@ public class SimpleQuery {
      * ignore
      */
     @SafeVarargs
-    public static <T, K, D, A, M extends Map<K, D>> M listGroupBy(List<T> list, SFunction<T, K> sFunction, Collector<? super T, A, D> downstream, Consumer<T>... peeks) {
+    public static <T, K, D, A> Map<K, D> listGroupBy(List<T> list, SFunction<T, K> sFunction, Collector<T, A, D> downstream, Consumer<T>... peeks) {
         return listGroupBy(list, sFunction, downstream, false, peeks);
     }
 
@@ -215,14 +225,13 @@ public class SimpleQuery {
      * @param <K>        实体中的分组依据对应类型，也是Map中key的类型
      * @param <D>        下游操作对应返回类型，也是Map中value的类型
      * @param <A>        下游操作在进行中间操作时对应类型
-     * @param <M>        最后返回结果Map类型
      * @return Map<实体中的属性, List < 实体>>
      */
     @SafeVarargs
     @SuppressWarnings("unchecked")
-    public static <T, K, D, A, M extends Map<K, D>> M listGroupBy(List<T> list, SFunction<T, K> sFunction, Collector<? super T, A, D> downstream, boolean isParallel, Consumer<T>... peeks) {
+    public static <T, K, D, A> Map<K, D> listGroupBy(List<T> list, SFunction<T, K> sFunction, Collector<T, A, D> downstream, boolean isParallel, Consumer<T>... peeks) {
         boolean hasFinished = downstream.characteristics().contains(Collector.Characteristics.IDENTITY_FINISH);
-        return peekStream(list, isParallel, peeks).collect(new Collector<T, HashMap<K, A>, M>() {
+        return peekStream(list, isParallel, peeks).collect(new Collector<T, HashMap<K, A>, Map<K, D>>() {
             @Override
             public Supplier<HashMap<K, A>> supplier() {
                 return HashMap::new;
@@ -249,11 +258,11 @@ public class SimpleQuery {
             }
 
             @Override
-            public Function<HashMap<K, A>, M> finisher() {
-                return hasFinished ? i -> (M) i : intermediate -> {
+            public Function<HashMap<K, A>, Map<K, D>> finisher() {
+                return hasFinished ? i -> (Map<K, D>) i : intermediate -> {
                     intermediate.replaceAll((k, v) -> (A) downstream.finisher().apply(v));
                     @SuppressWarnings("unchecked")
-                    M castResult = (M) intermediate;
+                    Map<K, D> castResult = (Map<K, D>) intermediate;
                     return castResult;
                 };
             }
@@ -317,15 +326,7 @@ public class SimpleQuery {
      * @return 查询列表结果
      */
     public static <E> List<E> selectList(Class<E> entityClass, LambdaQueryWrapper<E> wrapper) {
-        SqlSession sqlSession = SqlHelper.sqlSession(entityClass);
-        List<E> result;
-        try {
-            BaseMapper<E> userMapper = SqlHelper.getMapper(entityClass, sqlSession);
-            result = userMapper.selectList(wrapper);
-        } finally {
-            SqlSessionUtils.closeSqlSession(sqlSession, GlobalConfigUtils.currentSessionFactory(entityClass));
-        }
-        return result;
+        return SqlHelper.execute(entityClass, m -> m.selectList(wrapper));
     }
 
 }

@@ -135,14 +135,15 @@ public class TenantLineInnerInterceptor extends JsqlParserSupport implements Inn
 
         Select select = insert.getSelect();
         if (select != null) {
-            this.processInsertSelect(select.getSelectBody());
+            processInsertSelect(select.getSelectBody());
         } else if (insert.getItemsList() != null) {
             // fixed github pull/295
             ItemsList itemsList = insert.getItemsList();
+            Expression tenantId = tenantLineHandler.getTenantId();
             if (itemsList instanceof MultiExpressionList) {
-                ((MultiExpressionList) itemsList).getExpressionLists().forEach(el -> el.getExpressions().add(tenantLineHandler.getTenantId()));
+                ((MultiExpressionList) itemsList).getExpressionLists().forEach(el -> el.getExpressions().add(tenantId));
             } else {
-                ((ExpressionList) itemsList).getExpressions().add(tenantLineHandler.getTenantId());
+                ((ExpressionList) itemsList).getExpressions().add(tenantId);
             }
         } else {
             throw ExceptionUtils.mpe("Failed to process multiple-table update, please exclude the tableName or statementId");
@@ -470,7 +471,7 @@ public class TenantLineInnerInterceptor extends JsqlParserSupport implements Inn
                         onTables = Collections.singletonList(leftTable);
                     }
                 } else if (join.isLeft()) {
-                     onTables = Collections.singletonList(joinTable);
+                    onTables = Collections.singletonList(joinTable);
                 } else if (join.isInner()) {
                     if (mainTable == null) {
                         onTables = Collections.singletonList(joinTable);
@@ -528,17 +529,20 @@ public class TenantLineInnerInterceptor extends JsqlParserSupport implements Inn
         if (CollectionUtils.isEmpty(tables)) {
             return currentExpression;
         }
-        // 租户
-        Expression tenantId = tenantLineHandler.getTenantId();
         // 构造每张表的条件
-        List<EqualsTo> equalsTos = tables.stream()
+        List<Table> tempTables = tables.stream()
             .filter(x -> !tenantLineHandler.ignoreTable(x.getName()))
-            .map(item -> new EqualsTo(getAliasColumn(item), tenantId))
             .collect(Collectors.toList());
 
-        if(CollectionUtils.isEmpty(equalsTos)){
+        // 没有表需要处理直接返回
+        if (CollectionUtils.isEmpty(tempTables)) {
             return currentExpression;
         }
+
+        Expression tenantId = tenantLineHandler.getTenantId();
+        List<EqualsTo> equalsTos = tempTables.stream()
+            .map(item -> new EqualsTo(getAliasColumn(item), tenantId))
+            .collect(Collectors.toList());
 
         // 注入的表达式
         Expression injectExpression = equalsTos.get(0);
@@ -568,13 +572,12 @@ public class TenantLineInnerInterceptor extends JsqlParserSupport implements Inn
      */
     protected Column getAliasColumn(Table table) {
         StringBuilder column = new StringBuilder();
-        // 为了兼容隐式内连接，没有别名时条件就需要加上表名
+        // 禁止 `为了兼容隐式内连接，没有别名时条件就需要加上表名`
+        // 该起别名就要起别名
         if (table.getAlias() != null) {
-            column.append(table.getAlias().getName());
-        } else {
-            column.append(table.getName());
+            column.append(table.getAlias().getName()).append(StringPool.DOT);
         }
-        column.append(StringPool.DOT).append(tenantLineHandler.getTenantIdColumn());
+        column.append(tenantLineHandler.getTenantIdColumn());
         return new Column(column.toString());
     }
 
