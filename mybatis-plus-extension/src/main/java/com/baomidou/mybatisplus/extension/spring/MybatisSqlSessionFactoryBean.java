@@ -45,11 +45,9 @@ import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.transaction.SpringManagedTransactionFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.core.NestedIOException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -84,7 +82,7 @@ import static org.springframework.util.StringUtils.tokenizeToStringArray;
  * @author hubin
  * @since 2017-01-04
  */
-public class MybatisSqlSessionFactoryBean implements FactoryBean<SqlSessionFactory>, InitializingBean, ApplicationListener<ApplicationEvent> {
+public class MybatisSqlSessionFactoryBean implements FactoryBean<SqlSessionFactory>, InitializingBean, ApplicationListener<ContextRefreshedEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MybatisSqlSessionFactoryBean.class);
 
@@ -539,7 +537,7 @@ public class MybatisSqlSessionFactoryBean implements FactoryBean<SqlSessionFacto
             try {
                 targetConfiguration.setDatabaseId(this.databaseIdProvider.getDatabaseId(this.dataSource));
             } catch (SQLException e) {
-                throw new NestedIOException("Failed getting a databaseId", e);
+                throw new IOException("Failed getting a databaseId", e);
             }
         }
 
@@ -550,7 +548,7 @@ public class MybatisSqlSessionFactoryBean implements FactoryBean<SqlSessionFacto
                 xmlConfigBuilder.parse();
                 LOGGER.debug(() -> "Parsed configuration file: '" + this.configLocation + "'");
             } catch (Exception ex) {
-                throw new NestedIOException("Failed to parse config resource: " + this.configLocation, ex);
+                throw new IOException("Failed to parse config resource: " + this.configLocation, ex);
             } finally {
                 ErrorContext.instance().reset();
             }
@@ -573,7 +571,7 @@ public class MybatisSqlSessionFactoryBean implements FactoryBean<SqlSessionFacto
                             targetConfiguration, mapperLocation.toString(), targetConfiguration.getSqlFragments());
                         xmlMapperBuilder.parse();
                     } catch (Exception e) {
-                        throw new NestedIOException("Failed to parse mapping resource: '" + mapperLocation + "'", e);
+                        throw new IOException("Failed to parse mapping resource: '" + mapperLocation + "'", e);
                     } finally {
                         ErrorContext.instance().reset();
                     }
@@ -632,8 +630,8 @@ public class MybatisSqlSessionFactoryBean implements FactoryBean<SqlSessionFacto
      * {@inheritDoc}
      */
     @Override
-    public void onApplicationEvent(ApplicationEvent event) {
-        if (failFast && event instanceof ContextRefreshedEvent) {
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if (failFast) {
             // fail-fast -> check all statements are completed
             this.sqlSessionFactory.getConfiguration().getMappedStatementNames();
         }

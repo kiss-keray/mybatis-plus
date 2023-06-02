@@ -59,6 +59,7 @@ public class DialectFactory {
             // postgresql same type
             else if (dbType == DbType.POSTGRE_SQL
                 || dbType == DbType.H2
+                || dbType == DbType.LEALONE
                 || dbType == DbType.SQLITE
                 || dbType == DbType.HSQL
                 || dbType == DbType.KINGBASE_ES
@@ -69,7 +70,8 @@ public class DialectFactory {
                 || dbType == DbType.VERTICA
                 || dbType == DbType.REDSHIFT
                 || dbType == DbType.OPENGAUSS
-                || dbType == DbType.TDENGINE) {
+                || dbType == DbType.TDENGINE
+                || dbType == DbType.UXDB) {
                 dialect = new PostgreDialect();
             }
             // other types
@@ -83,18 +85,15 @@ public class DialectFactory {
                 dialect = new SQLServer2005Dialect();
             } else if (dbType == DbType.SYBASE) {
                 dialect = new SybaseDialect();
-            } else if (dbType == DbType.GBASEDBT) {
-                dialect = new GBasedbtDialect();
-            } else if (dbType == DbType.GBASE_INFORMIX) {
-                dialect = new GBaseInfromixDialect();
             } else if (dbType == DbType.XCloud) {
                 dialect = new XCloudDialect();
-            } else if (dbType == DbType.FIREBIRD) {
-                dialect = new FirebirdDialect();
             } else if (dbType == DbType.GBASE_8S
                 || dbType == DbType.GBASEDBT
-                || dbType == DbType.GBASE_INFORMIX) {
+                || dbType == DbType.GBASE_INFORMIX
+                || dbType == DbType.SINODB) {
                 dialect = new GBase8sDialect();
+            } else if (dbType == DbType.INFORMIX) {
+                dialect = new InformixDialect();
             }
             DIALECT_ENUM_MAP.put(dbType, dialect);
         }

@@ -1,3 +1,2 @@
-- 多租户插件:多表join表名必需起别名,否则追加的过滤条件不带前缀
-- fix: InterceptorIgnore 不能过滤 selectKey 的问题
-- fix: 补全`mybatis-plus-boot-starter-test`遗漏配置
+fix: 修复在选择springdoc文档注释时entity描述异常
+fix: 在主键的`IdType`为`AUTO`的情况下,`Table#getAllInsertSqlColumnMaybeIf("xx.")`所生成sql错误问题
