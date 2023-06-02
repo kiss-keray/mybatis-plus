@@ -100,7 +100,26 @@ public enum DbType {
      * GBase
      */
     GBASE("gbase", "南大通用(华库)数据库"),
+    /**
+     * GBase-8s
+     */
+    GBASE_8S("gbase-8s", "南大通用数据库 GBase 8s"),
+    /**
+     * use {@link  #GBASE_8S}
+     *
+     * @deprecated 2022-05-30
+     */
+    @Deprecated
     GBASEDBT("gbasedbt", "南大通用数据库"),
+    /**
+     * use {@link  #GBASE_8S}
+     *
+     * @deprecated 2022-05-30
+     */
+    @Deprecated
+    GBASE_INFORMIX("gbase 8s", "南大通用数据库 GBase 8s"),
+
+    SINODB("sinodb","星瑞格数据库"),
     /**
      * Oscar
      */
@@ -117,7 +136,6 @@ public enum DbType {
      * Firebird
      */
     FIREBIRD("Firebird", "Firebird 数据库"),
-
     /**
      * HighGo
      */
@@ -126,7 +144,6 @@ public enum DbType {
      * CUBRID
      */
     CUBRID("cubrid", "CUBRID数据库"),
-
     /**
      * GOLDILOCKS
      */
@@ -144,7 +161,39 @@ public enum DbType {
      */
     IMPALA("impala", "impala数据库"),
     /**
-     * UNKONWN DB
+     * Vertica
+     */
+    VERTICA("vertica", "vertica数据库"),
+    /**
+     * xcloud
+     */
+    XCloud("xcloud", "行云数据库"),
+    /**
+     * redshift
+     */
+    REDSHIFT("redshift", "亚马逊redshift数据库"),
+    /**
+     * openGauss
+     */
+    OPENGAUSS("openGauss", "华为 opengauss 数据库"),
+    /**
+     * TDengine
+     */
+    TDENGINE("TDengine", "TDengine数据库"),
+    /**
+     * Informix
+     */
+    INFORMIX("informix", "Informix数据库"),
+    /**
+     * uxdb
+     */
+    UXDB("uxdb", "优炫数据库"),
+    /**
+     * lealone
+     */
+    LEALONE("lealone", "Lealone数据库"),
+    /**
+     * UNKNOWN DB
      */
     OTHER("other", "其他数据库");
 

@@ -15,7 +15,6 @@
  */
 package com.baomidou.mybatisplus.core.injector;
 
-import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.core.toolkit.*;
@@ -46,12 +45,14 @@ import static java.util.stream.Collectors.joining;
  * @author hubin
  * @since 2018-04-06
  */
-@SuppressWarnings("serial")
 public abstract class AbstractMethod implements Constants {
-    protected static final Log logger = LogFactory.getLog(AbstractMethod.class);
+
+    protected final Log logger = LogFactory.getLog(getClass());
 
     protected Configuration configuration;
+
     protected LanguageDriver languageDriver;
+
     protected MapperBuilderAssistant builderAssistant;
 
     /**
@@ -59,15 +60,6 @@ public abstract class AbstractMethod implements Constants {
      * @since 3.5.0
      */
     protected final String methodName;
-
-    /**
-     * @see AbstractMethod#AbstractMethod(java.lang.String)
-     * @since 3.5.0
-     */
-    @Deprecated
-    public AbstractMethod() {
-        methodName = null;
-    }
 
     /**
      * @param methodName 方法名
@@ -441,19 +433,5 @@ public abstract class AbstractMethod implements Constants {
      * @return MappedStatement
      */
     public abstract MappedStatement injectMappedStatement(Class<?> mapperClass, Class<?> modelClass, TableInfo tableInfo);
-
-    /**
-     * 获取自定义方法名，未设置采用默认方法名
-     * https://gitee.com/baomidou/mybatis-plus/pulls/88
-     *
-     * @return method
-     * @author 义陆无忧
-     * @see AbstractMethod#AbstractMethod(java.lang.String)
-     * @deprecated 3.5.0
-     */
-    @Deprecated
-    public String getMethod(SqlMethod sqlMethod) {
-        return StringUtils.isBlank(methodName) ? sqlMethod.getMethod() : this.methodName;
-    }
 
 }

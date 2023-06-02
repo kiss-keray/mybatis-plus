@@ -20,6 +20,7 @@ import com.baomidou.mybatisplus.core.conditions.interfaces.Compare;
 import com.baomidou.mybatisplus.core.conditions.interfaces.Func;
 import com.baomidou.mybatisplus.core.conditions.interfaces.Join;
 import com.baomidou.mybatisplus.core.conditions.interfaces.Nested;
+import com.baomidou.mybatisplus.core.conditions.segments.ColumnSegment;
 import com.baomidou.mybatisplus.core.conditions.segments.MergeSegments;
 import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.core.enums.SqlLike;
@@ -43,7 +44,7 @@ import static java.util.stream.Collectors.joining;
  * @author hubin miemie HCL
  * @since 2017-05-26
  */
-@SuppressWarnings({"unchecked"})
+@SuppressWarnings({"unchecked", "serial"})
 public abstract class AbstractWrapper<T, R, Children extends AbstractWrapper<T, R, Children>> extends Wrapper<T>
     implements Compare<Children, R>, Nested<Children, Children>, Join<Children>, Func<Children, R> {
 
@@ -185,6 +186,16 @@ public abstract class AbstractWrapper<T, R, Children extends AbstractWrapper<T, 
     @Override
     public Children likeRight(boolean condition, R column, Object val) {
         return likeValue(condition, LIKE, column, val, SqlLike.RIGHT);
+    }
+
+    @Override
+    public Children notLikeLeft(boolean condition, R column, Object val) {
+        return likeValue(condition, NOT_LIKE, column, val, SqlLike.LEFT);
+    }
+
+    @Override
+    public Children notLikeRight(boolean condition, R column, Object val) {
+        return likeValue(condition, NOT_LIKE, column, val, SqlLike.RIGHT);
     }
 
     @Override
@@ -344,14 +355,13 @@ public abstract class AbstractWrapper<T, R, Children extends AbstractWrapper<T, 
     }
 
     @Override
-    @SafeVarargs
-    public final Children orderBy(boolean condition, boolean isAsc, R column, R... columns) {
+    public Children orderBy(boolean condition, boolean isAsc, R column, R... columns) {
         return maybeDo(condition, () -> {
             final SqlKeyword mode = isAsc ? ASC : DESC;
-            appendSqlSegments(ORDER_BY, columnToSqlSegment(columnSqlInjectFilter(column)), mode);
+            appendSqlSegments(ORDER_BY, columnToSqlSegment(column), mode);
             if (ArrayUtils.isNotEmpty(columns)) {
                 Arrays.stream(columns).forEach(c -> appendSqlSegments(ORDER_BY,
-                    columnToSqlSegment(columnSqlInjectFilter(c)), mode));
+                    columnToSqlSegment(c), mode));
             }
         });
     }
@@ -368,24 +378,14 @@ public abstract class AbstractWrapper<T, R, Children extends AbstractWrapper<T, 
 
     @Override
     public Children orderBy(boolean condition, boolean isAsc, R column) {
-        return maybeDo(condition, () -> appendSqlSegments(ORDER_BY, columnToSqlSegment(columnSqlInjectFilter(column)),
+        return maybeDo(condition, () -> appendSqlSegments(ORDER_BY, columnToSqlSegment(column),
             isAsc ? ASC : DESC));
     }
 
     @Override
     public Children orderBy(boolean condition, boolean isAsc, List<R> columns) {
         return maybeDo(condition, () -> columns.forEach(c -> appendSqlSegments(ORDER_BY,
-            columnToSqlSegment(columnSqlInjectFilter(c)), isAsc ? ASC : DESC)));
-    }
-
-    /**
-     * 字段 SQL 注入过滤处理，子类重写实现过滤逻辑
-     *
-     * @param column 字段内容
-     * @return
-     */
-    protected R columnSqlInjectFilter(R column) {
-        return column;
+            columnToSqlSegment(c), isAsc ? ASC : DESC)));
     }
 
     @Override
@@ -633,7 +633,7 @@ public abstract class AbstractWrapper<T, R, Children extends AbstractWrapper<T, 
     /**
      * 获取 columnName
      */
-    protected final ISqlSegment columnToSqlSegment(R column) {
+    protected final ColumnSegment columnToSqlSegment(R column) {
         return () -> columnToString(column);
     }
 

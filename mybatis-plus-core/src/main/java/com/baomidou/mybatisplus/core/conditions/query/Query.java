@@ -18,6 +18,8 @@ package com.baomidou.mybatisplus.core.conditions.query;
 import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -30,7 +32,29 @@ public interface Query<Children, T, R> extends Serializable {
      * ignore
      */
     @SuppressWarnings("unchecked")
-    Children select(R... columns);
+    default Children select(R... columns) {
+        return select(true, columns);
+    }
+
+    /**
+     * ignore
+     */
+    @SuppressWarnings("unchecked")
+    default Children select(boolean condition, R... columns) {
+        return select(condition, Arrays.asList(columns));
+    }
+
+    /**
+     * ignore
+     */
+    default Children select(List<R> columns) {
+        return select(true, columns);
+    }
+
+    /**
+     * ignore
+     */
+    Children select(boolean condition, List<R> columns);
 
     /**
      * ignore
