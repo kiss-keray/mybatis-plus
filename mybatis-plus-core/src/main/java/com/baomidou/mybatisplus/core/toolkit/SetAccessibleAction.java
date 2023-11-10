@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,10 @@ import java.security.PrivilegedAction;
 
 /**
  * Create by hcl at 2021/5/14
+ *
+ * @deprecated 3.5.4
  */
+@Deprecated
 public class SetAccessibleAction<T extends AccessibleObject> implements PrivilegedAction<T> {
     private final T obj;
 

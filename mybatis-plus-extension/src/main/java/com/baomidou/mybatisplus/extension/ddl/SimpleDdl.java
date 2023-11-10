@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.function.Consumer;
  * @since 2021-09-23
  */
 public class SimpleDdl implements IDdl {
+
     @Autowired
     private DataSource dataSource;
 
@@ -40,4 +41,5 @@ public class SimpleDdl implements IDdl {
     public List<String> getSqlFiles() {
         return null;
     }
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,34 @@ import java.lang.reflect.Field;
  */
 public class AopUtils {
 
+    /**
+     * 是否加载Spring-Aop模块
+     *
+     * @since 3.5.4
+     */
+    private static boolean loadAop = false;
+
+    static {
+        try {
+            ClassUtils.toClassConfident("org.springframework.aop.framework.AopProxyUtils");
+            loadAop = true;
+        } catch (Exception exception) {
+            // ignore
+        }
+    }
+
     private static final Log logger = LogFactory.getLog(AopUtils.class);
+
+    /**
+     * 是否加载Spring-Aop模块
+     *
+     * @return 是否加载Spring-Aop模块
+     * @since 3.5.5
+     */
+    public static boolean isLoadSpringAop() {
+        return loadAop;
+    }
+
 
     /**
      * 获取源目标对象

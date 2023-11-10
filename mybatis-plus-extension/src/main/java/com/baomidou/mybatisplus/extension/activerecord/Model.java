@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,12 @@ public abstract class Model<T extends Model<?>> implements Serializable {
      */
     public boolean deleteById() {
         Assert.isFalse(StringUtils.checkValNull(pkVal()), "deleteById primaryKey is null.");
-        return deleteById(pkVal());
+        SqlSession sqlSession = sqlSession();
+        try {
+            return SqlHelper.retBool(sqlSession.delete(sqlStatement(SqlMethod.DELETE_BY_ID), this));
+        } finally {
+            closeSqlSession(sqlSession);
+        }
     }
 
     /**
@@ -111,7 +116,6 @@ public abstract class Model<T extends Model<?>> implements Serializable {
      */
     public boolean updateById() {
         Assert.isFalse(StringUtils.checkValNull(pkVal()), "updateById primaryKey is null.");
-        // updateById
         Map<String, Object> map = CollectionUtils.newHashMapWithExpectedSize(1);
         map.put(Constants.ENTITY, this);
         SqlSession sqlSession = sqlSession();
@@ -131,7 +135,6 @@ public abstract class Model<T extends Model<?>> implements Serializable {
         Map<String, Object> map = CollectionUtils.newHashMapWithExpectedSize(2);
         map.put(Constants.ENTITY, this);
         map.put(Constants.WRAPPER, updateWrapper);
-        // update
         SqlSession sqlSession = sqlSession();
         try {
             return SqlHelper.retBool(sqlSession.update(sqlStatement(SqlMethod.UPDATE), map));
@@ -211,7 +214,7 @@ public abstract class Model<T extends Model<?>> implements Serializable {
         map.put("page", page);
         SqlSession sqlSession = sqlSession();
         try {
-            page.setRecords(sqlSession.selectList(sqlStatement(SqlMethod.SELECT_PAGE), map));
+            page.setRecords(sqlSession.selectList(sqlStatement(SqlMethod.SELECT_LIST), map));
         } finally {
             closeSqlSession(sqlSession);
         }
