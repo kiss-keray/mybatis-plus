@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,8 @@ public class SqliteTypeConvert implements ITypeConvert {
     public static final SqliteTypeConvert INSTANCE = new SqliteTypeConvert();
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
      * @see MySqlTypeConvert#toDateType(GlobalConfig, String)
      */
     @Override

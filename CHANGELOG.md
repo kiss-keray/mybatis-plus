@@ -1,7 +1,92 @@
 ﻿# CHANGELOG
 
-## [v3.5.3] 2022.12.29
+## [v3.5.4.1] 2023.11.4
+- fix: 修复Aop增强Mapper层导致的转换错误.
+
+## [v3.5.4] 2023.10.22
+
+- fix: 修复Insert无字段时执行SQL报错.
+- fix: 修复高版本JDK下lambda无法执行IDEA调试.
+- fix: 修复LambdaQuery中select,groupBy,orderBy,orderByAsc,orderByDesc提示的警告,新增对应doXxx方法支持重写(不兼容改动,api方法做了final处理).
+- fix: 修复inject-sql-session-on-mapper-scan无配置提示.
+- fix: 修复@OrderBy搭配@TableId排序字段错误(不兼容改动,com.baomidou.mybatisplus.core.metadata.TableInfo.orderByFields调整了类型).
+- fix: 修复Service中根据主键逻辑删除时类型不匹配导致的错误.
+- fix: 修复分页插件Count与自定义ResultHandler冲突.
+- fix: 修复字段填充处理器可能会出现重入问题
+- feat: 新增自增主键字段是否允许插入控制,可使用方法注入覆盖Insert(boolean ignoreAutoIncrementColumn)或Insert(String name, boolean ignoreAutoIncrementColumn)控制自增主键是否支持写入行为.
+- feat: ActiveRecord模式下deleteById(逻辑删除)方法支持自动填充功能.
+- feat: 内置泛型提取,支持非Spring体系项目使用.
+- feat: BaseMapper新增update(wrapper)更新方法.
+- feat: BaseMapper新增流式查询方法对大数据查询支持.
+- feat: 代码生成器元数据信息公开tableName与columnName字段访问.
+- feat: 新增mybatis-plus-spring-boot3-starter与mybatis-plus-spring-boot3-starter-test支持SpringBoot3.
+- feat: 支持插件缺省注入,当无MybatisPlusInterceptor注入时,支持com.baomidou.mybatisplus.extension.plugins.inner.InnerInterceptor自动注入.
+- feat: 升级源码Jdk开发版本至Java21.
+- feat: 升级gradle-wrapper至8.4-rc-1.
+- feat: 升级kotlin-gradle-plugin至1.9.20-Beta.
+- feat: 升级SpringBoot2.x版本至2.7.15.
+- feat: 升级lombok至1.18.30.
+- opt: mybatis-plus-extension中mybatis-spring依赖修改为可选依赖(不兼容改动,如果项目在非spring或非springBoot下使用到了请手动添加依赖).
+- opt: spring-boot-starter减少无用的配置提示(不兼容改动,调整了com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties.configuration类型).
+- opt: 字段填充处理器提取去除固定参数提取,支持更宽松的mapper方法参数提取填充处理,
+- opt: 去除com.baomidou.mybatisplus.core.toolkit.ReflectionKit.setAccessible方法调用,防止高版本Jdk移除
+- opt: 调整selectOne方法(配合流式处理,最多提取两行数据,日志不再打印总记录数).
+- opt: 优化selectObjs方法返回值,减少类型强制转换.
+- opt: 通用Service支持多SqlSessionFactory注入.
+- opt: 优化TableInfo.newInstance创建实例方法.
+- opt: 去除多余的@SuppressWarnings("serial")
+
+
+## [v3.5.3.2] 2023.08.08
+
+- feat: 升级mybatis至3.5.13,mybatis-spring至2.1.1
+- feat: jsqlparser提供统一解析类,可配置解析函数,并加入缓存选项
+- feat: 增加Sequence初始化debug日志
+- feat: 参数填充器支持多参数填充
+- feat: BaseMapper新增selectMaps(page, wrapper)与selectList(page, wrapper)方法
+- feat: 乐观锁字段支持 java.time.Instant
+- feat: `wrapper#apply`支持配置`mapping`比如`column={0,javaType=int,jdbcType=NUMERIC,typeHandler=xxx.xxx.MyTypeHandler}`
+- feat: 调整 QueryWrapper 需要主动开启检查 SQL 注入过滤（移除掉wrapper的orderby的sql过滤功能）
+- feat: 新增星瑞格数据库支持
+- feat: `updateWrapper#setSql`方法支持`动态入参`参考`wrapper#apply`方法
+- feat: 自动 SQL 维护 DDL 支持 SQL 执行存储过程
+- perf: `ktWrapper`加强泛型限制
+- fix: 修复在选择springdoc文档注释时entity描述异常
+- fix: 在主键的`IdType`为`AUTO`的情况下,`Table#getAllInsertSqlColumnMaybeIf("xx.")`所生成sql错误问题
+- fix: 租户插件支持`update set subSelect`的情况
+- fix: 修复高版本Jdk提示非法反射警告(Illegal reflective access by com.baomidou.mybatisplus.core.toolkit.SetAccessibleAction)
+- fix: 修复高版本Jdk插件动态代理反射错误 (Unable to make field protected java.lang.reflect.InvocationHandler java.lang.reflect.Proxy.h accessible)
+- fix: 修复路径替换将原有的“.”替换成了文件分隔符“/”
+- fix: 修复Beetl模板引擎无法生成注释
+- fix: 修复Types.DOUBLE类型无法映射
+- fix: 修复转换父类公共字段报错
+- fix: 修复生成器无法通过cfg.取值
+- fix: 修复单元测试下MockBean时事务回滚失败
+- fix: 修复Warpper类nonEmptyOfWhere方法命名不规范,导致Ognl未正确缓存带来的执行开销
+- fix: ClickHouseQuery类的tableComment()方法返回表注释字段为comment
+- fix: 修复在选择springdoc文档注释时entity描述异常问题
+- fix: Table\#getAllInsertSqlColumnMaybeIf("xx.")下的sql生成错误问题
+- fix: Db类增加根据实体不为空的字段条件查询方法重载
+- fix: 生成器对于Kotlin的Entity文件的superEntityClass的错误
+- fix: 修复springdoc freemarker模式下 表注释取值取不到
+- opt: 增强参数填充处理器,防止因参数名称与填充名称一致类型不匹配导致转换错误
+- opt: 优化方法注入,去除SelectPage,SelectMapsPage,SelectByMap,DeleteByMap注入
+- opt: 减少MappedStatement堆内存占用
+- opt: 解决PluginUtils重复获取元数据带来的性能消耗
+- opt: 注入方法去除多余的换行符
+- opt: 去除SqlRunner持有的sqlSessionFactory变量
+- opt: 解决Sequence初始化多次问题(自定义情况下可不创建默认主键生成器)
+- opt: 优化 SqlHelper#getMapper 返回泛型
+- opt: 去除SqlRunner持有的sqlSessionFactory变量
+- docs: 修正DdlHelper注释错误
+
+
+## [v3.5.3.1] 2022.12.29
+
 - bug:生成模块pg和dm语句模式名增加
+- feat: 优化 ChainWrapper#getEntityClass
+- fix: 修复在 IService.lambdaQuery().one() 使用场景在数据库无数据时报错问题
+- est 以及租户插件解析sql遇到多表必须给表起别名
 
 
 ## [v3.5.3] 2022.12.28

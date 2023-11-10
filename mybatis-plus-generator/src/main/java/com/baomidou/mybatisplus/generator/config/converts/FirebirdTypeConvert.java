@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public class FirebirdTypeConvert implements ITypeConvert {
     public static final FirebirdTypeConvert INSTANCE = new FirebirdTypeConvert();
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     @Override
     public IColumnType processTypeConvert(GlobalConfig config, String fieldType) {

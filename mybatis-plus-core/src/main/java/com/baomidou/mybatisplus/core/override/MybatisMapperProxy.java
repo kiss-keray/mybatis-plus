@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,6 +115,10 @@ public class MybatisMapperProxy<T> implements InvocationHandler, Serializable {
             Throwable cause = re.getCause();
             throw cause == null ? re : cause;
         }
+    }
+
+    public SqlSession getSqlSession() {
+        return sqlSession;
     }
 
     private MethodHandle getMethodHandleJava9(Method method)

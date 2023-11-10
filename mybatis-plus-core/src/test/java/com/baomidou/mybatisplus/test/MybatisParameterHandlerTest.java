@@ -122,9 +122,9 @@ class MybatisParameterHandlerTest {
         Model model2 = new Model();
         params1.put("arrays", new Model[]{model1, model2});
         new MybatisParameterHandler(mappedStatement, params1, boundSql);
-        assertThat(model1.getId()).isNull();
-        assertThat(model2.getId()).isNull();
-        assertThat(model1.getInsertOperator()).isNull();
+        assertThat(model1.getId()).isNotNull();
+        assertThat(model2.getId()).isNotNull();
+        assertThat(model1.getInsertOperator()).isNotNull();
         assertThat(model1.getUpdateOperator()).isNull();
 
         model1 = new Model();
@@ -249,6 +249,23 @@ class MybatisParameterHandlerTest {
         mappedStatement = new MappedStatement.Builder(configuration, "***", staticSqlSource, SqlCommandType.UPDATE).build();
         new MybatisParameterHandler(mappedStatement, list, boundSql);
         list.forEach(m -> {
+            assertThat(m.getId()).isNotNull();
+            assertThat(m.getInsertOperator()).isNotNull();
+            assertThat(m.getUpdateOperator()).isNotNull();
+        });
+
+        Model[] arrays = new Model[]{new Model("坦克一号"), new Model("坦克二号")};
+        mappedStatement = new MappedStatement.Builder(configuration, "***", staticSqlSource, SqlCommandType.INSERT).build();
+        new MybatisParameterHandler(mappedStatement, arrays, boundSql);
+        Arrays.stream(arrays).forEach(m -> {
+            assertThat(m.getId()).isNotNull();
+            assertThat(m.getInsertOperator()).isNotNull();
+            assertThat(m.getUpdateOperator()).isNull();
+        });
+
+        mappedStatement = new MappedStatement.Builder(configuration, "***", staticSqlSource, SqlCommandType.UPDATE).build();
+        new MybatisParameterHandler(mappedStatement, arrays, boundSql);
+        Arrays.stream(arrays).forEach(m -> {
             assertThat(m.getId()).isNotNull();
             assertThat(m.getInsertOperator()).isNotNull();
             assertThat(m.getUpdateOperator()).isNotNull();

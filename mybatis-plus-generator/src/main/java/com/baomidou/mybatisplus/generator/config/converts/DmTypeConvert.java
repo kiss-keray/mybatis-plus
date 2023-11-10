@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,6 @@ public class DmTypeConvert implements ITypeConvert {
      * @param config    全局配置
      * @param fieldType 字段类型
      * @return 对应的数据类型
-     * @inheritDoc
      */
     @Override
     public IColumnType processTypeConvert(GlobalConfig config, String fieldType) {

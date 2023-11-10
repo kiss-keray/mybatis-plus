@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import java.util.*;
  */
 public abstract class BaseKeyWordsHandler implements IKeyWordsHandler {
 
-    public Set<String> keyWords;
+    public final Set<String> keyWords;
 
     public BaseKeyWordsHandler(@NotNull List<String> keyWords) {
         this.keyWords = new HashSet<>(keyWords);
@@ -47,4 +47,5 @@ public abstract class BaseKeyWordsHandler implements IKeyWordsHandler {
     public boolean isKeyWords(@NotNull String columnName) {
         return getKeyWords().contains(columnName.toUpperCase(Locale.ENGLISH));
     }
+
 }

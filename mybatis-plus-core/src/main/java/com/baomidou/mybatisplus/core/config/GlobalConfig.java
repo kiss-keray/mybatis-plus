@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ import java.util.concurrent.ConcurrentSkipListSet;
  */
 @Data
 @Accessors(chain = true)
-@SuppressWarnings("serial")
 public class GlobalConfig implements Serializable {
     /**
      * 是否开启 LOGO
@@ -67,7 +66,10 @@ public class GlobalConfig implements Serializable {
     private Class<?> superMapperClass = Mapper.class;
     /**
      * 仅用于缓存 SqlSessionFactory(外部勿进行set,set了也没用)
+     *
+     * @deprecated 3.5.3.2
      */
+    @Deprecated
     private SqlSessionFactory sqlSessionFactory;
     /**
      * 缓存已注入CRUD的Mapper信息
@@ -117,6 +119,15 @@ public class GlobalConfig implements Serializable {
          * @since 3.1.1
          */
         private String columnFormat;
+        /**
+         * db 表 format
+         * <p>
+         * 例: `%s`
+         * <p>
+         *
+         * @since 3.5.3.2
+         */
+        private String tableFormat;
         /**
          * entity 的字段(property)的 format,只有在 column as property 这种情况下生效
          * <p>

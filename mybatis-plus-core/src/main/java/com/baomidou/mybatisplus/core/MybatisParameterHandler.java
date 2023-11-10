@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,17 @@ import com.baomidou.mybatisplus.core.exceptions.MybatisPlusException;
 import com.baomidou.mybatisplus.core.incrementer.IdentifierGenerator;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
+import com.baomidou.mybatisplus.core.toolkit.ArrayUtils;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.core.toolkit.GlobalConfigUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
-import org.apache.ibatis.mapping.*;
+import org.apache.ibatis.mapping.BoundSql;
+import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.ParameterMapping;
+import org.apache.ibatis.mapping.ParameterMode;
+import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
@@ -38,10 +43,14 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 自定义 ParameterHandler 重装构造函数，填充插入方法主键 ID
@@ -50,6 +59,15 @@ import java.util.Map;
  * @since 3.4.0
  */
 public class MybatisParameterHandler implements ParameterHandler {
+
+    /**
+     * 填充的key值
+     *
+     * @since 3.5.3.2
+     * @deprecated 3.5.4
+     */
+    @Deprecated
+    public static final String[] COLLECTION_KEYS = new String[]{"collection", "coll", "list", "array"};
 
     private final TypeHandlerRegistry typeHandlerRegistry;
     private final MappedStatement mappedStatement;
@@ -75,13 +93,7 @@ public class MybatisParameterHandler implements ParameterHandler {
             if (SimpleTypeRegistry.isSimpleType(parameter.getClass())) {
                 return parameter;
             }
-            Collection<Object> parameters = getParameters(parameter);
-            if (null != parameters) {
-                // 感觉这里可以稍微优化一下，理论上都是同一个.
-                parameters.forEach(this::process);
-            } else {
-                process(parameter);
-            }
+            extractParameters(parameter).forEach(this::process);
         }
         return parameter;
     }
@@ -183,12 +195,16 @@ public class MybatisParameterHandler implements ParameterHandler {
      * </p>
      *
      * @return 集合参数
+     * @deprecated 3.5.3.2
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
+    @Deprecated
     protected Collection<Object> getParameters(Object parameterObject) {
         Collection<Object> parameters = null;
         if (parameterObject instanceof Collection) {
             parameters = (Collection) parameterObject;
+        } else if (ArrayUtils.isArray(parameterObject)) {
+            parameters = toCollection(parameterObject);
         } else if (parameterObject instanceof Map) {
             Map parameterMap = (Map) parameterObject;
             // 约定 coll collection list array 这四个特殊key值处理批量.
@@ -207,18 +223,47 @@ public class MybatisParameterHandler implements ParameterHandler {
         return parameters;
     }
 
+    /**
+     * 提取特殊key值 (只支持外层参数,嵌套参数不考虑)
+     * List<Map>虽然这种写法目前可以进去提取et,但不考虑再提取list等其他类型,只做简单参数提取
+     *
+     * @param parameterObject 参数
+     * @return 预期可能为填充参数值
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private Collection<Object> extractParameters(Object parameterObject) {
+        if (parameterObject instanceof Collection) {
+            return (Collection) parameterObject;
+        } else if (ArrayUtils.isArray(parameterObject)) {
+            return toCollection(parameterObject);
+        } else if (parameterObject instanceof Map) {
+            Collection<Object> parameters = new ArrayList<>();
+            Map<String, Object> parameterMap = (Map) parameterObject;
+            Set<Object> objectSet = new HashSet<>();
+            parameterMap.forEach((k, v) -> {
+                if (objectSet.add(v)) {
+                    Collection<Object> collection = toCollection(v);
+                    parameters.addAll(collection);
+                }
+            });
+            return parameters;
+        } else {
+            return Collections.singleton(parameterObject);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     protected Collection<Object> toCollection(Object value) {
         if (value == null) {
-            return null;
+            return Collections.emptyList();
         }
-        // 只处理array和collection
-        if (value.getClass().isArray()) {
+        if (ArrayUtils.isArray(value)) {
             return Arrays.asList((Object[]) value);
         } else if (Collection.class.isAssignableFrom(value.getClass())) {
             return (Collection<Object>) value;
+        } else {
+            return Collections.singletonList(value);
         }
-        return null;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,28 @@ import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
+import com.baomidou.mybatisplus.core.override.MybatisMapperProxy;
 import com.baomidou.mybatisplus.core.toolkit.*;
+import com.baomidou.mybatisplus.core.toolkit.reflect.GenericTypeUtils;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
+import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.SqlSessionUtils;
+import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
+import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -49,24 +59,55 @@ import java.util.function.Function;
 @SuppressWarnings("unchecked")
 public class ServiceImpl<M extends BaseMapper<T>, T> implements IService<T> {
 
-    protected Log log = LogFactory.getLog(getClass());
+    private final ConversionService conversionService = DefaultConversionService.getSharedInstance();
+
+    protected final Log log = LogFactory.getLog(getClass());
 
     @Autowired
     protected M baseMapper;
+
+    protected final Class<?>[] typeArguments = GenericTypeUtils.resolveTypeArguments(getClass(), ServiceImpl.class);
 
     @Override
     public M getBaseMapper() {
         return baseMapper;
     }
 
-    protected Class<T> entityClass = currentModelClass();
+    protected final Class<T> entityClass = currentModelClass();
 
     @Override
     public Class<T> getEntityClass() {
         return entityClass;
     }
 
-    protected Class<M> mapperClass = currentMapperClass();
+    protected final Class<M> mapperClass = currentMapperClass();
+
+    private volatile SqlSessionFactory sqlSessionFactory;
+
+    @SuppressWarnings({"rawtypes", "deprecation"})
+    protected SqlSessionFactory getSqlSessionFactory() {
+        if (this.sqlSessionFactory == null) {
+            synchronized (this) {
+                if (this.sqlSessionFactory == null) {
+                    Object target = this.baseMapper;
+                    // 这个检查目前看着来说基本上可以不用判断Aop是不是存在了.
+                    if (com.baomidou.mybatisplus.extension.toolkit.AopUtils.isLoadSpringAop()) {
+                        if (AopUtils.isAopProxy(this.baseMapper)) {
+                            target = AopProxyUtils.getSingletonTarget(this.baseMapper);
+                        }
+                    }
+                    if (target != null) {
+                        MybatisMapperProxy mybatisMapperProxy = (MybatisMapperProxy) Proxy.getInvocationHandler(target);
+                        SqlSessionTemplate sqlSessionTemplate = (SqlSessionTemplate) mybatisMapperProxy.getSqlSession();
+                        this.sqlSessionFactory = sqlSessionTemplate.getSqlSessionFactory();
+                    } else {
+                        this.sqlSessionFactory = GlobalConfigUtils.currentSessionFactory(this.entityClass);
+                    }
+                }
+            }
+        }
+        return this.sqlSessionFactory;
+    }
 
     /**
      * 判断数据库操作是否成功
@@ -81,11 +122,11 @@ public class ServiceImpl<M extends BaseMapper<T>, T> implements IService<T> {
     }
 
     protected Class<M> currentMapperClass() {
-        return (Class<M>) ReflectionKit.getSuperClassGenericType(this.getClass(), ServiceImpl.class, 0);
+        return (Class<M>) this.typeArguments[0];
     }
 
     protected Class<T> currentModelClass() {
-        return (Class<T>) ReflectionKit.getSuperClassGenericType(this.getClass(), ServiceImpl.class, 1);
+        return (Class<T>) this.typeArguments[1];
     }
 
 
@@ -96,7 +137,7 @@ public class ServiceImpl<M extends BaseMapper<T>, T> implements IService<T> {
      */
     @Deprecated
     protected SqlSession sqlSessionBatch() {
-        return SqlHelper.sqlSessionBatch(entityClass);
+        return getSqlSessionFactory().openSession(ExecutorType.BATCH);
     }
 
     /**
@@ -107,7 +148,7 @@ public class ServiceImpl<M extends BaseMapper<T>, T> implements IService<T> {
      */
     @Deprecated
     protected void closeSqlSession(SqlSession sqlSession) {
-        SqlSessionUtils.closeSqlSession(sqlSession, GlobalConfigUtils.currentSessionFactory(entityClass));
+        SqlSessionUtils.closeSqlSession(sqlSession, getSqlSessionFactory());
     }
 
     /**
@@ -175,7 +216,7 @@ public class ServiceImpl<M extends BaseMapper<T>, T> implements IService<T> {
         Assert.notNull(tableInfo, "error: can not execute. because can not find cache of TableInfo for entity!");
         String keyProperty = tableInfo.getKeyProperty();
         Assert.notEmpty(keyProperty, "error: can not execute. because can not find column for id from entity!");
-        return SqlHelper.saveOrUpdateBatch(this.entityClass, this.mapperClass, this.log, entityList, batchSize, (sqlSession, entity) -> {
+        return SqlHelper.saveOrUpdateBatch(getSqlSessionFactory(), this.mapperClass, this.log, entityList, batchSize, (sqlSession, entity) -> {
             Object idVal = tableInfo.getPropertyValue(entity, keyProperty);
             return StringUtils.checkValNull(idVal)
                 || CollectionUtils.isEmpty(sqlSession.selectList(getSqlStatement(SqlMethod.SELECT_BY_ID), entity));
@@ -226,7 +267,7 @@ public class ServiceImpl<M extends BaseMapper<T>, T> implements IService<T> {
      */
     @Deprecated
     protected boolean executeBatch(Consumer<SqlSession> consumer) {
-        return SqlHelper.executeBatch(this.entityClass, this.log, consumer);
+        return SqlHelper.executeBatch(getSqlSessionFactory(), this.log, consumer);
     }
 
     /**
@@ -240,7 +281,7 @@ public class ServiceImpl<M extends BaseMapper<T>, T> implements IService<T> {
      * @since 3.3.1
      */
     protected <E> boolean executeBatch(Collection<E> list, int batchSize, BiConsumer<SqlSession, E> consumer) {
-        return SqlHelper.executeBatch(this.entityClass, this.log, list, batchSize, consumer);
+        return SqlHelper.executeBatch(getSqlSessionFactory(), this.log, list, batchSize, consumer);
     }
 
     /**
@@ -284,7 +325,8 @@ public class ServiceImpl<M extends BaseMapper<T>, T> implements IService<T> {
         if (useFill && tableInfo.isWithLogicDelete()) {
             if (!entityClass.isAssignableFrom(id.getClass())) {
                 T instance = tableInfo.newInstance();
-                tableInfo.setPropertyValue(instance, tableInfo.getKeyProperty(), id);
+                Object value = tableInfo.getKeyType() != id.getClass() ? conversionService.convert(id, tableInfo.getKeyType()) : id;
+                tableInfo.setPropertyValue(instance, tableInfo.getKeyProperty(), value);
                 return removeById(instance);
             }
         }
@@ -309,7 +351,8 @@ public class ServiceImpl<M extends BaseMapper<T>, T> implements IService<T> {
                     sqlSession.update(sqlStatement, e);
                 } else {
                     T instance = tableInfo.newInstance();
-                    tableInfo.setPropertyValue(instance, tableInfo.getKeyProperty(), e);
+                    Object value = tableInfo.getKeyType() != e.getClass() ? conversionService.convert(e, tableInfo.getKeyType()) : e;
+                    tableInfo.setPropertyValue(instance, tableInfo.getKeyProperty(), value);
                     sqlSession.update(sqlStatement, instance);
                 }
             } else {

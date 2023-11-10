@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,14 +53,14 @@ public class InjectionConfig {
      * 自定义模板文件，key为文件名称，value为模板路径（已弃用，换成了customFiles，3.5.4版本会删除此方法）
      */
     @Deprecated
-    private Map<String, String> customFile = new HashMap<>();
+    private final Map<String, String> customFile = new HashMap<>();
 
     /**
      * 自定义模板文件列表
      *
      * @since 3.5.3
      */
-    private List<CustomFile> customFiles = new ArrayList<>();
+    private final List<CustomFile> customFiles = new ArrayList<>();
 
     /**
      * 是否覆盖已有文件（默认 false）（已弃用，已放到自定义文件类CustomFile中，3.5.4版本会删除此方法）
@@ -73,10 +73,11 @@ public class InjectionConfig {
     /**
      * 输出文件前
      */
-    @NotNull
     public void beforeOutputFile(TableInfo tableInfo, Map<String, Object> objectMap) {
         if (!customMap.isEmpty()) {
             objectMap.putAll(customMap);
+            //增加一个兼容兼容取值,推荐还是直接取值外置key即可,例如abc取值${abc}而不需要${cfg.abc}
+            objectMap.put("cfg", customMap);
         }
         if (null != beforeOutputFileBiConsumer) {
             beforeOutputFileBiConsumer.accept(tableInfo, objectMap);
@@ -193,4 +194,5 @@ public class InjectionConfig {
             return this.injectionConfig;
         }
     }
+
 }
