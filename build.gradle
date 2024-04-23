@@ -220,9 +220,14 @@ subprojects {
             maven {
                 def userName = System.getProperty("un")
                 def passWord = System.getProperty("ps")
-                def releasesRepoUrl = "https://packages.aliyun.com/maven/repository/2010881-release-hOyeRP/"
-                def snapshotsRepoUrl = "https://packages.aliyun.com/maven/repository/2010881-snapshot-JFQB6y/"
-                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+                def cqvip = System.getProperty("cqvip", "false")
+                def rurl = "https://packages.aliyun.com/maven/repository/2010881-release-hOyeRP/"
+                def surl = "https://packages.aliyun.com/maven/repository/2010881-release-hOyeRP/"
+                if(cqvip == "true") {
+                    rurl = "https://packages.aliyun.com/maven/repository/2219534-release-3y4mJo"
+                    surl = "https://packages.aliyun.com/maven/repository/2219534-release-3y4mJo"
+                }
+                url = version.endsWith('SNAPSHOT') ? surl : rurl
 
                 credentials {
                     username userName
