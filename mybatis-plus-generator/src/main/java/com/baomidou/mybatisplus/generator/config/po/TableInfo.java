@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,9 @@ import com.baomidou.mybatisplus.generator.config.GlobalConfig;
 import com.baomidou.mybatisplus.generator.config.StrategyConfig;
 import com.baomidou.mybatisplus.generator.config.builder.ConfigBuilder;
 import com.baomidou.mybatisplus.generator.config.builder.Entity;
+import com.baomidou.mybatisplus.generator.config.builder.Service;
 import com.baomidou.mybatisplus.generator.config.rules.IColumnType;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
@@ -56,46 +58,55 @@ public class TableInfo {
     /**
      * 是否转换
      */
+    @Getter
     private boolean convert;
 
     /**
      * 表名称
      */
+    @Getter
     private String name;
 
     /**
      * 表注释
      */
+    @Getter
     private String comment;
 
     /**
      * 实体名称
      */
+    @Getter
     private String entityName;
 
     /**
      * mapper名称
      */
+    @Getter
     private String mapperName;
 
     /**
      * xml名称
      */
+    @Getter
     private String xmlName;
 
     /**
      * service名称
      */
+    @Getter
     private String serviceName;
 
     /**
      * serviceImpl名称
      */
+    @Getter
     private String serviceImplName;
 
     /**
      * controller名称
      */
+    @Getter
     private String controllerName;
 
     /**
@@ -106,6 +117,7 @@ public class TableInfo {
     /**
      * 是否有主键
      */
+    @Getter
     private boolean havePrimaryKey;
 
     /**
@@ -159,7 +171,6 @@ public class TableInfo {
      */
     public TableInfo setEntityName(@NotNull String entityName) {
         this.entityName = entityName;
-        //TODO 先放置在这里
         setConvert();
         return this;
     }
@@ -199,7 +210,6 @@ public class TableInfo {
      * 转换filed实体为 xml mapper 中的 base column 字符串信息
      */
     public String getFieldNames() {
-        //TODO 感觉这个也啥必要,不打算公开set方法了
         if (StringUtils.isBlank(fieldNames)) {
             this.fieldNames = this.fields.stream().map(TableField::getColumnName).collect(Collectors.joining(", "));
         }
@@ -300,54 +310,14 @@ public class TableInfo {
         return importPackages;
     }
 
-    public boolean isConvert() {
-        return convert;
-    }
-
     public TableInfo setConvert(boolean convert) {
         this.convert = convert;
         return this;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public String getEntityName() {
-        return entityName;
-    }
-
-    public String getMapperName() {
-        return mapperName;
-    }
-
-    public String getXmlName() {
-        return xmlName;
-    }
-
-    public String getServiceName() {
-        return serviceName;
-    }
-
-    public String getServiceImplName() {
-        return serviceImplName;
-    }
-
-    public String getControllerName() {
-        return controllerName;
-    }
-
     @NotNull
     public List<TableField> getFields() {
         return fields;
-    }
-
-    public boolean isHavePrimaryKey() {
-        return havePrimaryKey;
     }
 
     @NotNull
@@ -357,8 +327,9 @@ public class TableInfo {
 
     /**
      * 获取是否生成service接口
-     * @return
+     * @deprecated {@link Service.Builder#disableService()}
      */
+    @Deprecated
     public boolean isServiceInterface() {
         return globalConfig.isServiceInterface();
     }

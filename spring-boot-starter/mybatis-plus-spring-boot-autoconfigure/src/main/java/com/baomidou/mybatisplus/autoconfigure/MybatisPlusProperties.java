@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package com.baomidou.mybatisplus.autoconfigure;
 
+import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.config.GlobalConfig;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.core.toolkit.GlobalConfigUtils;
@@ -124,7 +125,7 @@ public class MybatisPlusProperties {
     private String typeEnumsPackage;
 
     /**
-     * TODO 全局配置
+     * 全局配置
      */
     @NestedConfigurationProperty
     private GlobalConfig globalConfig = GlobalConfigUtils.defaults();
@@ -335,10 +336,20 @@ public class MybatisPlusProperties {
          */
         private Properties variables;
 
-        // 新增兼容开始...
+        /**
+         * Specifies the database identify value for switching query to use.
+         */
+        private String databaseId;
+
+        // 新增兼容开始... mybatis 3.x 的有做属性删减  部分属性在2.x可用 3.x 已经被剔除了.
+        /**
+         * Specifies the language used by default for dynamic SQL generation.
+         */
         private Class<? extends LanguageDriver> defaultScriptingLanguageDriver;
 
-        public void applyTo(Configuration target) {
+        private Boolean useGeneratedShortKey;
+
+        public void applyTo(MybatisConfiguration target) {
             PropertyMapper mapper = PropertyMapper.get().alwaysApplyingWhenNonNull();
             mapper.from(getSafeRowBoundsEnabled()).to(target::setSafeRowBoundsEnabled);
             mapper.from(getSafeResultHandlerEnabled()).to(target::setSafeResultHandlerEnabled);
@@ -372,6 +383,8 @@ public class MybatisPlusProperties {
             mapper.from(getConfigurationFactory()).to(target::setConfigurationFactory);
             mapper.from(getDefaultEnumTypeHandler()).to(target::setDefaultEnumTypeHandler);
             mapper.from(getDefaultScriptingLanguageDriver()).to(target::setDefaultScriptingLanguage);
+            mapper.from(getDatabaseId()).to(target::setDatabaseId);
+            mapper.from(getUseGeneratedShortKey()).to(target::setUseGeneratedShortKey);
         }
     }
 

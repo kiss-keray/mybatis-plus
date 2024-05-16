@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 package com.baomidou.mybatisplus.core.handlers;
+
+import com.baomidou.mybatisplus.core.toolkit.AnnotationUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -34,7 +36,7 @@ public interface AnnotationHandler {
      * @return 注解
      */
     default <T extends Annotation> T getAnnotation(Class<?> beanClass, Class<T> annotationClass) {
-        return beanClass.getAnnotation(annotationClass);
+        return AnnotationUtils.findFirstAnnotation(annotationClass, beanClass);
     }
 
     /**
@@ -46,7 +48,7 @@ public interface AnnotationHandler {
      * @return 是否包含该注解
      */
     default <T extends Annotation> boolean isAnnotationPresent(Class<?> beanClass, Class<T> annotationClass) {
-        return beanClass.isAnnotationPresent(annotationClass);
+        return AnnotationUtils.findFirstAnnotation(annotationClass, beanClass) != null;
     }
 
     /**
@@ -58,7 +60,7 @@ public interface AnnotationHandler {
      * @return 注解
      */
     default <T extends Annotation> T getAnnotation(Field field, Class<T> annotationClass) {
-        return field.getAnnotation(annotationClass);
+        return AnnotationUtils.findFirstAnnotation(annotationClass, field);
     }
 
     /**
@@ -70,7 +72,7 @@ public interface AnnotationHandler {
      * @return 是否包含该注解
      */
     default <T extends Annotation> boolean isAnnotationPresent(Field field, Class<T> annotationClass) {
-        return field.isAnnotationPresent(annotationClass);
+        return AnnotationUtils.findFirstAnnotation(annotationClass, field) != null;
     }
 
     /**
@@ -82,7 +84,7 @@ public interface AnnotationHandler {
      * @return 注解
      */
     default <T extends Annotation> T getAnnotation(Method method, Class<T> annotationClass) {
-        return method.getAnnotation(annotationClass);
+        return AnnotationUtils.findFirstAnnotation(annotationClass, method);
     }
 
     /**
@@ -94,6 +96,6 @@ public interface AnnotationHandler {
      * @return 是否包含该注解
      */
     default <T extends Annotation> boolean isAnnotationPresent(Method method, Class<T> annotationClass) {
-        return method.isAnnotationPresent(annotationClass);
+        return AnnotationUtils.findFirstAnnotation(annotationClass, method) != null;
     }
 }

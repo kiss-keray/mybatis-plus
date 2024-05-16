@@ -11,25 +11,23 @@ ext {
     ]
 
     libraries = [
-        mybatisVersion = '3.5.13',
-        mybatisSpringVersion = '2.1.1',
-        mybatisSpring3Version = '3.0.2',
+        mybatisVersion = '3.5.16',
+        mybatisSpringVersion = '2.1.2',
         mybatisSpringBootStarterVersion = '2.3.1',
-        springVersion = '5.3.27',
-        springBootVersion = '2.7.15',
-        springBoot3Version = '3.1.5',
-        springCloudVersion = '3.1.1',
-        jsqlparserVersion = '4.6',
-        junitVersion = '5.9.0',
+        springVersion = '5.3.34',
+        springBootVersion = '2.7.18',
+        springBoot3Version = '3.2.4',
+        springCloudVersion = '3.1.8',
+        jsqlparserVersion = '4.9',
+        junitVersion = '5.10.2',
     ]
 
     lib = [
-        "kotlin-reflect"             : "org.jetbrains.kotlin:kotlin-reflect:1.9.0",
-        "kotlin-stdlib-jdk8"         : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0",
+        "kotlin-reflect"             : "org.jetbrains.kotlin:kotlin-reflect:1.9.24",
+        "kotlin-stdlib-jdk8"         : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24",
         "jsqlparser"                 : "com.github.jsqlparser:jsqlparser:${jsqlparserVersion}",
         "mybatis"                    : "org.mybatis:mybatis:${mybatisVersion}",
         "mybatis-spring"             : "org.mybatis:mybatis-spring:${mybatisSpringVersion}",
-        "mybatis-spring3"             : "org.mybatis:mybatis-spring:${mybatisSpring3Version}",
         "mybatis-thymeleaf"          : "org.mybatis.scripting:mybatis-thymeleaf:1.0.4",
         "mybatis-freemarker"         : "org.mybatis.scripting:mybatis-freemarker:1.2.3",
         "mybatis-velocity"           : "org.mybatis.scripting:mybatis-velocity:2.1.2",
@@ -38,46 +36,41 @@ ext {
         "spring-tx"                  : "org.springframework:spring-tx:${springVersion}",
         "spring-web"                 : "org.springframework:spring-web:${springVersion}",
         "spring-aop"                 : "org.springframework:spring-aop:${springVersion}",
-        "aspectjweaver"                  : "org.aspectj:aspectjweaver:1.9.20.1",
         "cglib"                      : "cglib:cglib:3.3.0",
-        "imadcn"                     : "com.imadcn.framework:idworker:1.5.0",
+        "imadcn"                     : "com.imadcn.framework:idworker:1.6.0",
         "spring-cloud-commons"       : "org.springframework.cloud:spring-cloud-commons:${springCloudVersion}",
 
-        "javax.servlet-api"          : "javax.servlet:javax.servlet-api:4.0.1",
-        "aspectjweaver"              : "org.aspectj:aspectjweaver:1.9.20.1",
+        "aspectjweaver"              : "org.aspectj:aspectjweaver:1.9.22.1",
         "slf4j-api"                  : "org.slf4j:slf4j-api:1.7.36",
         //copy
         "mybatis-spring-boot-starter": "org.mybatis.spring.boot:mybatis-spring-boot-starter:${mybatisSpringBootStarterVersion}",
         //test
         "spring-test"                : "org.springframework:spring-test:${springVersion}",
-        "assertj-core"               : "org.assertj:assertj-core:3.23.1",
+        "assertj-core"               : "org.assertj:assertj-core:3.25.3",
         "junit-jupiter"              : "org.junit.jupiter:junit-jupiter:${junitVersion}",
-        "fastjson"                   : "com.alibaba:fastjson:2.0.40",
-        "jackson"                    : "com.fasterxml.jackson.core:jackson-databind:2.15.2",
-        "gson"                       : "com.google.code.gson:gson:2.9.1",
+        "fastjson"                   : "com.alibaba:fastjson:2.0.50",
+        "jackson"                    : "com.fasterxml.jackson.core:jackson-databind:2.17.1",
+        "gson"                       : "com.google.code.gson:gson:2.10.1",
         "lagarto"                    : "org.jodd:jodd-lagarto:6.0.6",
         //datasource
         "p6spy"                      : "p6spy:p6spy:3.9.1",
         "sqlserver"                  : "com.microsoft.sqlserver:sqljdbc4:4.0",
-        "postgresql"                 : "org.postgresql:postgresql:42.4.1",
+        "postgresql"                 : "org.postgresql:postgresql:42.7.3",
         "oracle"                     : fileTree(dir: 'libs', includes: ['ojdbc8.jar']),
         "dm"                         : fileTree(dir: 'libs', includes: ["jdbcDriver-18.jar"]),
-        "kingbase"                   : fileTree(dir: 'libs', includes: ["kingbase8-8.2.0.jar"]),
         "h2"                         : "com.h2database:h2:2.2.224",
-        "mysql"                      : "mysql:mysql-connector-java:8.0.30",
-        "sqlite"                     : "org.xerial:sqlite-jdbc:3.43.0.0",
-        "firebird"                   : "org.firebirdsql.jdbc:jaybird:4.0.6.java8",
+        "mysql"                      : "com.mysql:mysql-connector-j:8.4.0",
+        "sqlite"                     : "org.xerial:sqlite-jdbc:3.45.3.0",
+        "firebird"                   : "org.firebirdsql.jdbc:jaybird:5.0.4.java8",
         //cache
-        "mybatis-ehcache"            : "org.mybatis.caches:mybatis-ehcache:1.2.3",
-        "mybatis-redis"              : "org.mybatis.caches:mybatis-redis:1.0.0-beta2",
         "mybatis-caffeine"           : "org.mybatis.caches:mybatis-caffeine:1.0.0",
         //code generator
         "velocity"            : "org.apache.velocity:velocity-engine-core:2.3",
         "freemarker"          : "org.freemarker:freemarker:2.3.32",
-        "beetl"               : "com.ibeetl:beetl:3.15.10.RELEASE",
-        "swagger-annotations" : "io.swagger:swagger-annotations:1.6.11",
+        "beetl"               : "com.ibeetl:beetl:3.16.1.RELEASE",
+        "swagger-annotations" : "io.swagger:swagger-annotations:1.6.14",
         "enjoy"               : "com.jfinal:enjoy:5.1.3",
-        "logback-classic"     : "ch.qos.logback:logback-classic:1.4.11",
+        "logback-classic"     : "ch.qos.logback:logback-classic:1.5.6",
     ]
 }
 
@@ -88,13 +81,12 @@ subprojects {
     apply plugin: 'signing'
     apply plugin: 'maven-publish'
     apply plugin: "io.freefair.lombok"
-    apply plugin: 'com.github.hierynomus.license'
 
     sourceCompatibility = "${javaVersion}"
     targetCompatibility = "${javaVersion}"
 
     lombok {
-        version = "1.18.30"
+        version = "1.18.32"
     }
 
     compileJava {
@@ -111,7 +103,7 @@ subprojects {
     dependencies {
         testImplementation "${lib["assertj-core"]}"
         testImplementation "${lib["junit-jupiter"]}"
-        testImplementation "org.mockito:mockito-junit-jupiter:5.6.0"
+        testImplementation "org.mockito:mockito-junit-jupiter:5.12.0"
         testImplementation "${lib["lagarto"]}"
     }
 
@@ -147,21 +139,6 @@ subprojects {
                 attributes 'Automatic-Module-Name': "${project.group}.${project.name.replaceAll("-", ".")}"
             }
         }
-    }
-
-    // 控制台直接执行 `gradle licenseMain` 或者 `gradle licenseFormatMain`
-    // 前者是检查 main 源码的 licence 情况,后者是在 main 源码文件上 format license
-    // 因为不打算在 test 代码上添加 licence, 所以不使用 licenseTest 和 licenseFormatTest 这俩
-    license {
-        encoding = "UTF-8"
-        header = rootProject.file("license.txt")
-        includes(["**/*.java", "**/*.kt"])
-        mapping {
-            java = "SLASHSTAR_STYLE"
-            kt = "SLASHSTAR_STYLE"
-        }
-        ignoreFailures = true
-        ext.year = Calendar.getInstance().get(Calendar.YEAR)
     }
 
     //noinspection GroovyAssignabilityCheck

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,8 +67,8 @@ public abstract class AbstractDatabaseQuery implements IDatabaseQuery {
     }
 
     protected void filter(List<TableInfo> tableList, List<TableInfo> includeTableList, List<TableInfo> excludeTableList) {
-        boolean isInclude = strategyConfig.getInclude().size() > 0;
-        boolean isExclude = strategyConfig.getExclude().size() > 0;
+        boolean isInclude = !strategyConfig.getInclude().isEmpty();
+        boolean isExclude = !strategyConfig.getExclude().isEmpty();
         if (isExclude || isInclude) {
             Map<String, String> notExistTables = new HashSet<>(isExclude ? strategyConfig.getExclude() : strategyConfig.getInclude())
                 .stream()
@@ -82,7 +82,7 @@ public abstract class AbstractDatabaseQuery implements IDatabaseQuery {
                 //解决可能大小写不敏感的情况导致无法移除掉
                 notExistTables.remove(tabInfo.getName().toLowerCase());
             }
-            if (notExistTables.size() > 0) {
+            if (!notExistTables.isEmpty()) {
                 LOGGER.warn("表[{}]在数据库中不存在！！！", String.join(StringPool.COMMA, notExistTables.values()));
             }
             // 需要反向生成的表信息

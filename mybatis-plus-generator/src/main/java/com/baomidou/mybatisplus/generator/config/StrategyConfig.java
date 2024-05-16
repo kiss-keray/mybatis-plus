@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.baomidou.mybatisplus.generator.config;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.generator.config.builder.*;
 import com.baomidou.mybatisplus.generator.config.po.LikeTable;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,6 +47,7 @@ public class StrategyConfig {
     /**
      * 是否跳过视图（默认 false）
      */
+    @Getter
     private boolean skipView;
 
     /**
@@ -93,11 +95,13 @@ public class StrategyConfig {
      *
      * @since 3.3.1
      */
+    @Getter
     private boolean enableSqlFilter = true;
 
     /**
      * 启用 schema 默认 false
      */
+    @Getter
     private boolean enableSchema;
 
     /**
@@ -257,8 +261,8 @@ public class StrategyConfig {
      * @since 3.5.0
      */
     public void validate() {
-        boolean isInclude = this.getInclude().size() > 0;
-        boolean isExclude = this.getExclude().size() > 0;
+        boolean isInclude = !this.getInclude().isEmpty();
+        boolean isExclude = !this.getExclude().isEmpty();
         if (isInclude && isExclude) {
             throw new IllegalArgumentException("<strategy> 标签中 <include> 与 <exclude> 只能配置一项！");
         }
@@ -316,10 +320,6 @@ public class StrategyConfig {
         return isCapitalMode;
     }
 
-    public boolean isSkipView() {
-        return skipView;
-    }
-
     @NotNull
     public Set<String> getTablePrefix() {
         return tablePrefix;
@@ -350,14 +350,6 @@ public class StrategyConfig {
         return exclude;
     }
 
-    public boolean isEnableSqlFilter() {
-        return enableSqlFilter;
-    }
-
-    public boolean isEnableSchema() {
-        return enableSchema;
-    }
-
     @Nullable
     public LikeTable getLikeTable() {
         return likeTable;
@@ -368,7 +360,7 @@ public class StrategyConfig {
         return notLikeTable;
     }
 
-    @Nullable
+    @NotNull
     public IOutputFile getOutputFile() {
         return outputFile;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,9 @@ public final class TableNameParser {
     private static final String TOKEN_SET = "set";
     private static final String TOKEN_OF = "of";
     private static final String TOKEN_DUAL = "dual";
+    private static final String IGNORE = "ignore";
     private static final String TOKEN_DELETE = "delete";
+    private static final String TOKEN_UPDATE = "update";
     private static final String TOKEN_CREATE = "create";
     private static final String TOKEN_INDEX = "index";
 
@@ -51,9 +53,10 @@ public final class TableNameParser {
     private static final String KEYWORD_FROM = "from";
     private static final String KEYWORD_USING = "using";
     private static final String KEYWORD_UPDATE = "update";
+    private static final String KEYWORD_STRAIGHT_JOIN = "straight_join";
     private static final String KEYWORD_DUPLICATE = "duplicate";
 
-    private static final List<String> concerned = Arrays.asList(KEYWORD_TABLE, KEYWORD_INTO, KEYWORD_JOIN, KEYWORD_USING, KEYWORD_UPDATE);
+    private static final List<String> concerned = Arrays.asList(KEYWORD_TABLE, KEYWORD_INTO, KEYWORD_JOIN, KEYWORD_USING, KEYWORD_UPDATE, KEYWORD_STRAIGHT_JOIN);
     private static final List<String> ignored = Arrays.asList(StringPool.LEFT_BRACKET, TOKEN_SET, TOKEN_OF, TOKEN_DUAL);
 
     /**
@@ -67,7 +70,7 @@ public final class TableNameParser {
      * 5、把 ,() 也要分出来
      */
     private static final Pattern NON_SQL_TOKEN_PATTERN = Pattern.compile("(--[^\\v]+)|;|(\\s+)|((?s)/[*].*?[*]/)"
-            + "|(((\\b|\\B)(?=[,()]))|((?<=[,()])(\\b|\\B)))"
+        + "|(((\\b|\\B)(?=[,()]))|((?<=[,()])(\\b|\\B)))"
     );
 
     private final List<SqlToken> tokens;
@@ -106,6 +109,10 @@ public final class TableNameParser {
                 } else if (concerned.contains(current.toLowerCase())) {
                     if (hasMoreTokens(tokens, index)) {
                         SqlToken next = tokens.get(index++);
+                        if (TOKEN_UPDATE.equalsIgnoreCase(current)
+                            && IGNORE.equalsIgnoreCase(next.getValue())) {
+                            next = tokens.get(index++);
+                        }
                         visitNameToken(next, visitor);
                     }
                 }

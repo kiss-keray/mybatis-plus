@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.util.*;
 
 /**
  * mysql关键字处理
- * 这里选取了mysql8.0文档中的关键字和保留字（含移除）https://dev.mysql.com/doc/refman/8.0/en/keywords.html
+ * <a href="https://dev.mysql.com/doc/refman/8.0/en/keywords.html">这里选取了mysql8.0文档中的关键字和保留字（含移除）</a>
  *
  * @author nieqiurong 2020/5/7.
  * @since 3.3.2

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,11 @@
  */
 package com.baomidou.mybatisplus.core.injector;
 
+import com.baomidou.mybatisplus.core.config.GlobalConfig;
 import com.baomidou.mybatisplus.core.injector.methods.*;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
+import com.baomidou.mybatisplus.core.toolkit.GlobalConfigUtils;
+import org.apache.ibatis.session.Configuration;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -33,9 +36,10 @@ import static java.util.stream.Collectors.toList;
 public class DefaultSqlInjector extends AbstractSqlInjector {
 
     @Override
-    public List<AbstractMethod> getMethodList(Class<?> mapperClass, TableInfo tableInfo) {
+    public List<AbstractMethod> getMethodList(Configuration configuration, Class<?> mapperClass, TableInfo tableInfo) {
+        GlobalConfig.DbConfig dbConfig = GlobalConfigUtils.getDbConfig(configuration);
         Stream.Builder<AbstractMethod> builder = Stream.<AbstractMethod>builder()
-            .add(new Insert())
+            .add(new Insert(dbConfig.isInsertIgnoreAutoIncrementColumn()))
             .add(new Delete())
             .add(new Update())
             .add(new SelectCount())

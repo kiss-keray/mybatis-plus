@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,8 +60,8 @@ public class DefaultQuery extends AbstractDatabaseQuery {
     @Override
     public @NotNull List<TableInfo> queryTables() {
         try {
-            boolean isInclude = strategyConfig.getInclude().size() > 0;
-            boolean isExclude = strategyConfig.getExclude().size() > 0;
+            boolean isInclude = !strategyConfig.getInclude().isEmpty();
+            boolean isExclude = !strategyConfig.getExclude().isEmpty();
             //所有的表信息
             List<TableInfo> tableList = new ArrayList<>();
             List<DatabaseMetaDataWrapper.Table> tables = this.getTables();

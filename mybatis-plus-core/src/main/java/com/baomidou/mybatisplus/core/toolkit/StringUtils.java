@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -596,10 +596,25 @@ public final class StringUtils {
             /**
              * 过滤sql黑名单字符，存在 SQL 注入，去除空白内容
              */
-            Matcher matcher = REPLACE_BLANK.matcher(str);
-            str = matcher.replaceAll("");
+            str = replaceAllBlank(str);
 
         }
         return str;
+    }
+
+    /**
+     * 字符串去除空白内容：
+     * <ul>
+     *     <li>\n 回车</li>
+     *     <li>\t 水平制表符</li>
+     *     <li>\s 空格</li>
+     *     <li>\r 换行</li>
+     * </ul>
+     *
+     * @param str 字符串
+     */
+    public static String replaceAllBlank(String str) {
+        Matcher matcher = REPLACE_BLANK.matcher(str);
+        return matcher.replaceAll("");
     }
 }

@@ -31,11 +31,11 @@
 # Special user
 
 <p>
-  <a href="https://www.diboot.com/?from=mp" target="_blank">
-   <img alt="Mybatis-Plus-Logo" src="https://www.diboot.com/diboot_slogon.png" width="210px" height="75px">
+  <a href="https://flowlong.gitee.io/docs/preface.html?from=mp" target="_blank">
+   <img alt="AiZuDa-Logo" src="https://baomidou.com/img/azd01.png" width="160px" height="50px">
   </a>
-  <a href="http://aizuda.com/?from=mp" target="_blank">
-   <img alt="Mybatis-Plus-Logo" src="https://baomidou.com/img/aizuda.png" width="210px" height="75px">
+  <a href="https://gitee.com/gz-yami/mall4j?from=mp" target="_blank">
+   <img alt="Mybatis-Plus-Logo" src="https://baomidou.com/img/mall4j.gif" width="160px" height="50px">
   </a>
 </p>
 
@@ -71,6 +71,7 @@ MyBatis-Plus is an powerful enhanced toolkit of MyBatis for simplify development
 -   Add MyBatis-Plus dependency
     - Latest Version: [![Maven Central](https://img.shields.io/maven-central/v/com.baomidou/mybatis-plus.svg)](https://search.maven.org/search?q=g:com.baomidou%20a:mybatis-*)
     - Maven:
+    - SpringBoot2
       ```xml
       <dependency>
           <groupId>com.baomidou</groupId>
@@ -78,9 +79,22 @@ MyBatis-Plus is an powerful enhanced toolkit of MyBatis for simplify development
           <version>Latest Version</version>
       </dependency>
       ```
+    - SpringBoot3
+      ```xml
+      <dependency>
+        <groupId>com.baomidou</groupId>
+        <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+        <version>Latest Version</version>
+      </dependency>
+      ```
     - Gradle
+    - SpringBoot2
       ```groovy
       compile group: 'com.baomidou', name: 'mybatis-plus-boot-starter', version: 'Latest Version'
+      ```
+    - SpringBoot3
+      ```groovy
+      compile group: 'com.baomidou', name: 'mybatis-plus-spring-boot3-starter', version: 'Latest Version'
       ```
 -   Modify mapper file extends BaseMapper interface
 

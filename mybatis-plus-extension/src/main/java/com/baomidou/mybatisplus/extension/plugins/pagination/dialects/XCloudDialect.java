@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,20 +24,13 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.DialectModel;
  * @since 2022-04-13
  */
 public class XCloudDialect implements IDialect {
-    /**
-     *
-     * @param originalSql
-     * @param offset
-     * @param limit
-     * @return
-     */
 
     @Override
     public DialectModel buildPaginationSql(String originalSql, long offset, long limit) {
         StringBuilder sql = new StringBuilder(originalSql).append(" LIMIT ");
         if (offset != 0L) {
-            sql.append(" ("+FIRST_MARK +","+SECOND_MARK+") ") ;
-            return new DialectModel(sql.toString(), offset+1, offset+limit).setConsumerChain();
+            sql.append(" (" + FIRST_MARK + "," + SECOND_MARK + ") ");
+            return new DialectModel(sql.toString(), offset + 1, offset + limit).setConsumerChain();
         } else {
             sql.append(FIRST_MARK);
             return new DialectModel(sql.toString(), limit).setConsumer(true);

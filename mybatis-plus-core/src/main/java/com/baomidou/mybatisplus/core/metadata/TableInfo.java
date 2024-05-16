@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -342,7 +342,7 @@ public class TableInfo implements Constants {
      */
     public String getAllInsertSqlPropertyMaybeIf(final String prefix, boolean ignoreAutoIncrementColumn) {
         final String newPrefix = prefix == null ? EMPTY : prefix;
-        if (ignoreAutoIncrementColumn) {
+        if (ignoreAutoIncrementColumn && idType == IdType.AUTO) {
             return fieldList.stream()
                 .map(i -> i.getInsertSqlPropertyMaybeIf(newPrefix)).filter(Objects::nonNull).collect(joining(NEWLINE));
         }
@@ -373,7 +373,7 @@ public class TableInfo implements Constants {
      */
     public String getAllInsertSqlColumnMaybeIf(final String prefix, boolean ignoreAutoIncrementColumn) {
         final String newPrefix = prefix == null ? EMPTY : prefix;
-        if (ignoreAutoIncrementColumn) {
+        if (ignoreAutoIncrementColumn && idType == IdType.AUTO) {
             return fieldList.stream().map(i -> i.getInsertSqlColumnMaybeIf(newPrefix))
                 .filter(Objects::nonNull).collect(joining(NEWLINE));
         }

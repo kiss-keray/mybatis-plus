@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import java.util.Properties;
  * @since 2016/8/30
  */
 public class DataSourceConfig {
+
     protected final Logger logger = LoggerFactory.getLogger(DataSourceConfig.class);
 
     private DataSourceConfig() {
@@ -238,6 +239,13 @@ public class DataSourceConfig {
                         // 使用元数据查询方式时，有些数据库需要增加属性才能读取注释
                         this.processProperties(properties);
                         this.connection = DriverManager.getConnection(url, properties);
+                        if (StringUtils.isBlank(this.schemaName)) {
+                            try {
+                                this.schemaName = connection.getSchema();
+                            } catch (Exception exception) {
+                                // ignore 老古董1.7以下的驱动不支持.
+                            }
+                        }
                     }
                 }
             }

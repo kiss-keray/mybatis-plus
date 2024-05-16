@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import com.baomidou.mybatisplus.generator.config.builder.ConfigBuilder;
 import com.baomidou.mybatisplus.generator.config.po.TableInfo;
 import com.baomidou.mybatisplus.generator.engine.AbstractTemplateEngine;
 import com.baomidou.mybatisplus.generator.engine.VelocityTemplateEngine;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,7 @@ import java.util.List;
  * @author YangHu, tangguo, hubin
  * @since 2016-08-30
  */
+@Getter
 public class AutoGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(AutoGenerator.class);
@@ -58,7 +60,9 @@ public class AutoGenerator {
     private PackageConfig packageInfo;
     /**
      * 模板 相关配置
+     * @deprecated 3.5.6 {@link #strategy}
      */
+    @Deprecated
     private TemplateConfig template;
     /**
      * 全局 相关配置
@@ -121,8 +125,10 @@ public class AutoGenerator {
      *
      * @param templateConfig 模板配置
      * @return this
+     * @deprecated 3.5.6 {@link #strategy(StrategyConfig)}
      * @since 3.5.0
      */
+    @Deprecated
     public AutoGenerator template(@NotNull TemplateConfig templateConfig) {
         this.template = templateConfig;
         return this;
@@ -191,31 +197,8 @@ public class AutoGenerator {
         return config.getTableInfoList();
     }
 
-    public ConfigBuilder getConfig() {
-        return config;
-    }
-
     public InjectionConfig getInjectionConfig() {
         return injection;
     }
 
-    public DataSourceConfig getDataSource() {
-        return dataSource;
-    }
-
-    public StrategyConfig getStrategy() {
-        return strategy;
-    }
-
-    public PackageConfig getPackageInfo() {
-        return packageInfo;
-    }
-
-    public TemplateConfig getTemplate() {
-        return template;
-    }
-
-    public GlobalConfig getGlobalConfig() {
-        return globalConfig;
-    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,34 @@
  */
 package com.baomidou.mybatisplus.core.mapper;
 
+import com.baomidou.mybatisplus.core.batch.BatchSqlSession;
+import com.baomidou.mybatisplus.core.batch.MybatisBatch;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Constants;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.core.metadata.TableInfo;
+import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
+import com.baomidou.mybatisplus.core.override.MybatisMapperProxy;
+import com.baomidou.mybatisplus.core.toolkit.*;
+import com.baomidou.mybatisplus.core.toolkit.reflect.GenericTypeUtils;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.exceptions.TooManyResultsException;
+import org.apache.ibatis.executor.BatchResult;
+import org.apache.ibatis.ognl.OgnlOps;
 import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.BiPredicate;
 
 /*
 
@@ -101,7 +113,31 @@ public interface BaseMapper<T> extends Mapper<T> {
      *
      * @param id 主键ID
      */
-    int deleteById(Serializable id);
+    default int deleteById(Serializable id) {
+        return deleteById(id, true);
+    }
+
+    /**
+     * 根据 ID 删除
+     *
+     * @param useFill 是否填充
+     * @param obj      主键ID或实体
+     * @since 3.5.7
+     */
+    default int deleteById(Object obj, boolean useFill) {
+        Class<?> entityClass = GenericTypeUtils.resolveTypeArguments(getClass(), BaseMapper.class)[0];
+        if (!entityClass.isAssignableFrom(obj.getClass()) && useFill) {
+            TableInfo tableInfo = TableInfoHelper.getTableInfo(entityClass);
+            if (tableInfo.isWithLogicDelete() && tableInfo.isWithUpdateFill()) {
+                T instance = tableInfo.newInstance();
+                tableInfo.setPropertyValue(instance, tableInfo.getKeyProperty(), OgnlOps.convertValue(obj, tableInfo.getKeyType()));
+                return this.deleteById(instance);
+            }
+        }
+        MybatisMapperProxy<?> mybatisMapperProxy = MybatisUtils.getMybatisMapperProxy(this);
+        SqlSession sqlSession = mybatisMapperProxy.getSqlSession();
+        return sqlSession.delete(mybatisMapperProxy.getMapperInterface().getName() + Constants.DOT + SqlMethod.DELETE_BY_ID.getMethod(), obj);
+    }
 
     /**
      * 根据实体(ID)删除
@@ -117,8 +153,7 @@ public interface BaseMapper<T> extends Mapper<T> {
      * @param columnMap 表字段 map 对象
      */
     default int deleteByMap(Map<String, Object> columnMap) {
-        QueryWrapper<T> qw = Wrappers.query();
-        return this.delete(qw.allEq(columnMap));
+        return this.delete(Wrappers.<T>query().allEq(columnMap));
     }
 
     /**
@@ -128,12 +163,44 @@ public interface BaseMapper<T> extends Mapper<T> {
      */
     int delete(@Param(Constants.WRAPPER) Wrapper<T> queryWrapper);
 
+
     /**
      * 删除（根据ID或实体 批量删除）
      *
      * @param idList 主键ID列表或实体列表(不能为 null 以及 empty)
      */
-    int deleteBatchIds(@Param(Constants.COLL) Collection<?> idList);
+    default int deleteByIds(@Param(Constants.COLL) Collection<?> idList) {
+        return deleteByIds(idList, true);
+    }
+
+    /**
+     * 删除（根据ID或实体 批量删除）
+     *
+     * @param collections 主键ID列表或实体列表(不能为 null 以及 empty)
+     * @param useFill     逻辑删除下是否填充
+     * @since 3.5.7
+     */
+    default int deleteByIds(@Param(Constants.COLL) Collection<?> collections, boolean useFill) {
+        MybatisMapperProxy<?> mybatisMapperProxy = MybatisUtils.getMybatisMapperProxy(this);
+        Class<?> entityClass = GenericTypeUtils.resolveTypeArguments(getClass(), BaseMapper.class)[0];
+        SqlSession sqlSession = mybatisMapperProxy.getSqlSession();
+        Class<?> mapperInterface = mybatisMapperProxy.getMapperInterface();
+        TableInfo tableInfo = TableInfoHelper.getTableInfo(entityClass);
+        List<Object> ids = new ArrayList<>(collections.size());
+        if (useFill && tableInfo.isWithLogicDelete() && tableInfo.isWithUpdateFill()) {
+            for (Object obj : collections) {
+                if (entityClass.isAssignableFrom(obj.getClass())) {
+                    ids.add(tableInfo.getPropertyValue(obj, tableInfo.getKeyProperty()));
+                } else {
+                    ids.add(obj);
+                }
+            }
+            this.update(tableInfo.newInstance(), Wrappers.<T>update().in(tableInfo.getKeyColumn(), ids));
+        }
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.COLL, collections);
+        return sqlSession.delete(mapperInterface.getName() + StringPool.DOT + SqlMethod.DELETE_BATCH_BY_IDS.getMethod(), params);
+    }
 
     /**
      * 根据 ID 修改
@@ -145,13 +212,14 @@ public interface BaseMapper<T> extends Mapper<T> {
     /**
      * 根据 whereEntity 条件，更新记录
      *
-     * @param entity        实体对象 (set 条件值,可以为 null)
+     * @param entity        实体对象 (set 条件值,可以为 null,当entity为null时,无法进行自动填充)
      * @param updateWrapper 实体对象封装操作类（可以为 null,里面的 entity 用于生成 where 语句）
      */
     int update(@Param(Constants.ENTITY) T entity, @Param(Constants.WRAPPER) Wrapper<T> updateWrapper);
 
     /**
      * 根据 Wrapper 更新记录
+     * <p>此方法无法进行自动填充,如需自动填充请使用{@link #update(Object, Wrapper)}</p>
      *
      * @param updateWrapper {@link UpdateWrapper} or {@link LambdaUpdateWrapper}
      * @since 3.5.4
@@ -189,8 +257,7 @@ public interface BaseMapper<T> extends Mapper<T> {
      * @param columnMap 表字段 map 对象
      */
     default List<T> selectByMap(Map<String, Object> columnMap) {
-        QueryWrapper<T> qw = Wrappers.query();
-        return this.selectList(qw.allEq(columnMap));
+        return this.selectList(Wrappers.<T>query().allEq(columnMap));
     }
 
     /**
@@ -222,21 +289,13 @@ public interface BaseMapper<T> extends Mapper<T> {
      * @param throwEx      boolean 参数，为true如果存在多个结果直接抛出异常
      */
     default T selectOne(@Param(Constants.WRAPPER) Wrapper<T> queryWrapper, boolean throwEx) {
-        List<T> list = new ArrayList<>();
-        //TODO 后期配合Page参数可以做数据库分页,下面的换成RowBounds做限制结果集也行
-        this.selectList(queryWrapper, resultContext -> {
-            T resultObject = resultContext.getResultObject();
-            list.add(resultObject);
-            if (!throwEx || resultContext.getResultCount() > 1) {
-                resultContext.stop();
-            }
-        });
+        List<T> list = this.selectList(queryWrapper);
         int size = list.size();
         if (size == 1) {
             return list.get(0);
         } else if (size > 1) {
             if (throwEx) {
-                throw new TooManyResultsException("Expected one result (or null) to be returned by selectOne(), but found multiple records");
+                throw new TooManyResultsException("Expected one result (or null) to be returned by selectOne(), but found: " + size);
             }
             return list.get(0);
         }
@@ -356,8 +415,7 @@ public interface BaseMapper<T> extends Mapper<T> {
      * @param queryWrapper 实体对象封装操作类（可以为 null）
      */
     default <P extends IPage<T>> P selectPage(P page, @Param(Constants.WRAPPER) Wrapper<T> queryWrapper) {
-        List<T> list = selectList(page, queryWrapper);
-        page.setRecords(list);
+        page.setRecords(selectList(page, queryWrapper));
         return page;
     }
 
@@ -368,9 +426,126 @@ public interface BaseMapper<T> extends Mapper<T> {
      * @param queryWrapper 实体对象封装操作类
      */
     default <P extends IPage<Map<String, Object>>> P selectMapsPage(P page, @Param(Constants.WRAPPER) Wrapper<T> queryWrapper) {
-        List<Map<String, Object>> list = selectMaps(page, queryWrapper);
-        page.setRecords(list);
+        page.setRecords(selectMaps(page, queryWrapper));
         return page;
+    }
+
+    /**
+     * 主键存在更新记录，否插入一条记录
+     *
+     * @param entity 实体对象 (不能为空)
+     * @since 3.5.7
+     */
+    default boolean saveOrUpdate(T entity) {
+        Class<?> entityClass = GenericTypeUtils.resolveTypeArguments(getClass(), BaseMapper.class)[0];
+        TableInfo tableInfo = TableInfoHelper.getTableInfo(entityClass);
+        Assert.notNull(tableInfo, "error: can not execute. because can not find cache of TableInfo for entity!");
+        String keyProperty = tableInfo.getKeyProperty();
+        Assert.notEmpty(keyProperty, "error: can not execute. because can not find column for id from entity!");
+        Object idVal = tableInfo.getPropertyValue(entity, tableInfo.getKeyProperty());
+        return StringUtils.checkValNull(idVal) || Objects.isNull(selectById((Serializable) idVal)) ? insert(entity) > 0 : updateById(entity) > 0;
+    }
+
+
+    /**
+     * 插入（批量）
+     *
+     * @param entityList 实体对象集合
+     * @since 3.5.7
+     */
+    default List<BatchResult> insert(Collection<T> entityList) {
+        return insert(entityList, Constants.DEFAULT_BATCH_SIZE);
+    }
+
+    /**
+     * 插入（批量）
+     *
+     * @param entityList 实体对象集合
+     * @param batchSize  插入批次数量
+     * @since 3.5.7
+     */
+    default List<BatchResult> insert(Collection<T> entityList, int batchSize) {
+        MybatisMapperProxy<?> mybatisMapperProxy = MybatisUtils.getMybatisMapperProxy(this);
+        MybatisBatch.Method<T> method = new MybatisBatch.Method<>(mybatisMapperProxy.getMapperInterface());
+        SqlSessionFactory sqlSessionFactory = MybatisUtils.getSqlSessionFactory(mybatisMapperProxy);
+        return MybatisBatchUtils.execute(sqlSessionFactory, entityList, method.insert(), batchSize);
+    }
+
+    /**
+     * 根据ID 批量更新
+     *
+     * @param entityList 实体对象集合
+     * @since 3.5.7
+     */
+    default List<BatchResult> updateById(Collection<T> entityList) {
+        return updateById(entityList, Constants.DEFAULT_BATCH_SIZE);
+    }
+
+    /**
+     * 根据ID 批量更新
+     *
+     * @param entityList 实体对象集合
+     * @param batchSize  插入批次数量
+     * @since 3.5.7
+     */
+    default List<BatchResult> updateById(Collection<T> entityList, int batchSize) {
+        MybatisMapperProxy<?> mybatisMapperProxy = MybatisUtils.getMybatisMapperProxy(this);
+        MybatisBatch.Method<T> method = new MybatisBatch.Method<>(mybatisMapperProxy.getMapperInterface());
+        SqlSessionFactory sqlSessionFactory = MybatisUtils.getSqlSessionFactory(mybatisMapperProxy);
+        return MybatisBatchUtils.execute(sqlSessionFactory, entityList, method.updateById(), batchSize);
+    }
+
+    /**
+     * 批量修改或插入
+     *
+     * @param entityList 实体对象集合
+     * @since 3.5.7
+     */
+    default List<BatchResult> insertOrUpdate(Collection<T> entityList) {
+        return insertOrUpdate(entityList, Constants.DEFAULT_BATCH_SIZE);
+    }
+
+    /**
+     * 批量修改或插入
+     *
+     * @param entityList 实体对象集合
+     * @param batchSize  插入批次数量
+     * @since 3.5.7
+     */
+    default List<BatchResult> insertOrUpdate(Collection<T> entityList, int batchSize) {
+        MybatisMapperProxy<?> mybatisMapperProxy = MybatisUtils.getMybatisMapperProxy(this);
+        Class<?> entityClass = GenericTypeUtils.resolveTypeArguments(getClass(), BaseMapper.class)[0];
+        TableInfo tableInfo = TableInfoHelper.getTableInfo(entityClass);
+        String keyProperty = tableInfo.getKeyProperty();
+        String statement = mybatisMapperProxy.getMapperInterface().getName() + StringPool.DOT + SqlMethod.SELECT_BY_ID.getMethod();
+        return insertOrUpdate(entityList, (sqlSession, entity) -> {
+            Object idVal = tableInfo.getPropertyValue(entity, keyProperty);
+            return StringUtils.checkValNull(idVal) || CollectionUtils.isEmpty(sqlSession.selectList(statement, entity));
+        }, batchSize);
+    }
+
+    /**
+     * 批量修改或插入
+     *
+     * @param entityList 实体对象集合
+     * @since 3.5.7
+     */
+    default List<BatchResult> insertOrUpdate(Collection<T> entityList, BiPredicate<BatchSqlSession, T> insertPredicate) {
+        return insertOrUpdate(entityList, insertPredicate, Constants.DEFAULT_BATCH_SIZE);
+    }
+
+    /**
+     * 批量修改或插入
+     *
+     * @param entityList 实体对象集合
+     * @param batchSize  插入批次数量
+     * @since 3.5.7
+     */
+    default List<BatchResult> insertOrUpdate(Collection<T> entityList, BiPredicate<BatchSqlSession, T> insertPredicate, int batchSize) {
+        MybatisMapperProxy<?> mybatisMapperProxy = MybatisUtils.getMybatisMapperProxy(this);
+        MybatisBatch.Method<T> method = new MybatisBatch.Method<>(mybatisMapperProxy.getMapperInterface());
+        SqlSessionFactory sqlSessionFactory = MybatisUtils.getSqlSessionFactory(mybatisMapperProxy);
+        return MybatisBatchUtils.saveOrUpdate(sqlSessionFactory, entityList, method.insert(), insertPredicate, method.updateById(), batchSize);
     }
 
 }

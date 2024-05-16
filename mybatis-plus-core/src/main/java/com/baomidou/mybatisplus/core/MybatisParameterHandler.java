@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 package com.baomidou.mybatisplus.core;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.core.exceptions.MybatisPlusException;
 import com.baomidou.mybatisplus.core.incrementer.IdentifierGenerator;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
@@ -24,31 +23,20 @@ import com.baomidou.mybatisplus.core.toolkit.ArrayUtils;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.core.toolkit.GlobalConfigUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import org.apache.ibatis.executor.ErrorContext;
-import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.ParameterMapping;
-import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.mapping.SqlCommandType;
+import org.apache.ibatis.ognl.OgnlOps;
 import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.scripting.defaults.DefaultParameterHandler;
 import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.SimpleTypeRegistry;
-import org.apache.ibatis.type.TypeException;
-import org.apache.ibatis.type.TypeHandler;
-import org.apache.ibatis.type.TypeHandlerRegistry;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -58,7 +46,7 @@ import java.util.Set;
  * @author nieqiuqiu 2020/6/5
  * @since 3.4.0
  */
-public class MybatisParameterHandler implements ParameterHandler {
+public class MybatisParameterHandler extends DefaultParameterHandler {
 
     /**
      * 填充的key值
@@ -69,38 +57,25 @@ public class MybatisParameterHandler implements ParameterHandler {
     @Deprecated
     public static final String[] COLLECTION_KEYS = new String[]{"collection", "coll", "list", "array"};
 
-    private final TypeHandlerRegistry typeHandlerRegistry;
-    private final MappedStatement mappedStatement;
-    private final Object parameterObject;
-    private final BoundSql boundSql;
     private final Configuration configuration;
     private final SqlCommandType sqlCommandType;
+    private final MappedStatement mappedStatement;
 
     public MybatisParameterHandler(MappedStatement mappedStatement, Object parameter, BoundSql boundSql) {
-        this.typeHandlerRegistry = mappedStatement.getConfiguration().getTypeHandlerRegistry();
+        super(mappedStatement, parameter, boundSql);
         this.mappedStatement = mappedStatement;
-        this.boundSql = boundSql;
         this.configuration = mappedStatement.getConfiguration();
         this.sqlCommandType = mappedStatement.getSqlCommandType();
-        this.parameterObject = processParameter(parameter);
+        processParameter(parameter);
     }
 
-    public Object processParameter(Object parameter) {
+    public void processParameter(Object parameter) {
         /* 只处理插入或更新操作 */
-        if (parameter != null
-            && (SqlCommandType.INSERT == this.sqlCommandType || SqlCommandType.UPDATE == this.sqlCommandType)) {
-            //检查 parameterObject
-            if (SimpleTypeRegistry.isSimpleType(parameter.getClass())) {
-                return parameter;
+        if (parameter != null && !SimpleTypeRegistry.isSimpleType(parameter.getClass())) {
+            if (SqlCommandType.INSERT == this.sqlCommandType || SqlCommandType.UPDATE == this.sqlCommandType) {
+                extractParameters(parameter).forEach(this::process);
             }
-            extractParameters(parameter).forEach(this::process);
         }
-        return parameter;
-    }
-
-    @Override
-    public Object getParameterObject() {
-        return this.parameterObject;
     }
 
     private void process(Object parameter) {
@@ -133,7 +108,6 @@ public class MybatisParameterHandler implements ParameterHandler {
         }
     }
 
-
     protected void populateKeys(TableInfo tableInfo, MetaObject metaObject, Object entity) {
         final IdType idType = tableInfo.getIdType();
         final String keyProperty = tableInfo.getKeyProperty();
@@ -142,27 +116,8 @@ public class MybatisParameterHandler implements ParameterHandler {
             Object idValue = metaObject.getValue(keyProperty);
             if (identifierGenerator.assignId(idValue)) {
                 if (idType.getKey() == IdType.ASSIGN_ID.getKey()) {
-                    Class<?> keyType = tableInfo.getKeyType();
-                    if (Number.class.isAssignableFrom(keyType)) {
-                        Number id = identifierGenerator.nextId(entity);
-                        if (keyType == id.getClass()) {
-                            metaObject.setValue(keyProperty, id);
-                        } else if (Integer.class == keyType) {
-                            metaObject.setValue(keyProperty, id.intValue());
-                        } else if (Long.class == keyType) {
-                            metaObject.setValue(keyProperty, id.longValue());
-                        } else if (BigDecimal.class.isAssignableFrom(keyType)) {
-                            metaObject.setValue(keyProperty, new BigDecimal(id.longValue()));
-                        } else if (BigInteger.class.isAssignableFrom(keyType)) {
-                            metaObject.setValue(keyProperty, new BigInteger(id.toString()));
-                        } else {
-                            throw new MybatisPlusException("Key type '" + keyType + "' not supported");
-                        }
-                    } else if (String.class.isAssignableFrom(keyType)) {
-                        metaObject.setValue(keyProperty, identifierGenerator.nextId(entity).toString());
-                    } else {
-                        metaObject.setValue(keyProperty, identifierGenerator.nextId(entity));
-                    }
+                    Number id = identifierGenerator.nextId(entity);
+                    metaObject.setValue(keyProperty, OgnlOps.convertValue(id, tableInfo.getKeyType()));
                 } else if (idType.getKey() == IdType.ASSIGN_UUID.getKey()) {
                     metaObject.setValue(keyProperty, identifierGenerator.nextUUID(entity));
                 }
@@ -170,10 +125,9 @@ public class MybatisParameterHandler implements ParameterHandler {
         }
     }
 
-
     protected void insertFill(MetaObject metaObject, TableInfo tableInfo) {
         GlobalConfigUtils.getMetaObjectHandler(this.configuration).ifPresent(metaObjectHandler -> {
-            if (metaObjectHandler.openInsertFill() && tableInfo.isWithInsertFill()) {
+            if (metaObjectHandler.openInsertFill() && metaObjectHandler.openInsertFill(mappedStatement) && tableInfo.isWithInsertFill()) {
                 metaObjectHandler.insertFill(metaObject);
             }
         });
@@ -181,7 +135,7 @@ public class MybatisParameterHandler implements ParameterHandler {
 
     protected void updateFill(MetaObject metaObject, TableInfo tableInfo) {
         GlobalConfigUtils.getMetaObjectHandler(this.configuration).ifPresent(metaObjectHandler -> {
-            if (metaObjectHandler.openUpdateFill() && tableInfo.isWithUpdateFill()) {
+            if (metaObjectHandler.openUpdateFill() && metaObjectHandler.openUpdateFill(mappedStatement) && tableInfo.isWithUpdateFill()) {
                 metaObjectHandler.updateFill(metaObject);
             }
         });
@@ -257,7 +211,7 @@ public class MybatisParameterHandler implements ParameterHandler {
         if (value == null) {
             return Collections.emptyList();
         }
-        if (ArrayUtils.isArray(value)) {
+        if (ArrayUtils.isArray(value) && !value.getClass().getComponentType().isPrimitive()) {
             return Arrays.asList((Object[]) value);
         } else if (Collection.class.isAssignableFrom(value.getClass())) {
             return (Collection<Object>) value;
@@ -266,39 +220,4 @@ public class MybatisParameterHandler implements ParameterHandler {
         }
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public void setParameters(PreparedStatement ps) {
-        ErrorContext.instance().activity("setting parameters").object(this.mappedStatement.getParameterMap().getId());
-        List<ParameterMapping> parameterMappings = this.boundSql.getParameterMappings();
-        if (parameterMappings != null) {
-            for (int i = 0; i < parameterMappings.size(); i++) {
-                ParameterMapping parameterMapping = parameterMappings.get(i);
-                if (parameterMapping.getMode() != ParameterMode.OUT) {
-                    Object value;
-                    String propertyName = parameterMapping.getProperty();
-                    if (this.boundSql.hasAdditionalParameter(propertyName)) { // issue #448 ask first for additional params
-                        value = this.boundSql.getAdditionalParameter(propertyName);
-                    } else if (this.parameterObject == null) {
-                        value = null;
-                    } else if (this.typeHandlerRegistry.hasTypeHandler(this.parameterObject.getClass())) {
-                        value = parameterObject;
-                    } else {
-                        MetaObject metaObject = this.configuration.newMetaObject(this.parameterObject);
-                        value = metaObject.getValue(propertyName);
-                    }
-                    TypeHandler typeHandler = parameterMapping.getTypeHandler();
-                    JdbcType jdbcType = parameterMapping.getJdbcType();
-                    if (value == null && jdbcType == null) {
-                        jdbcType = this.configuration.getJdbcTypeForNull();
-                    }
-                    try {
-                        typeHandler.setParameter(ps, i + 1, value, jdbcType);
-                    } catch (TypeException | SQLException e) {
-                        throw new TypeException("Could not set parameters for mapping: " + parameterMapping + ". Cause: " + e, e);
-                    }
-                }
-            }
-        }
-    }
 }

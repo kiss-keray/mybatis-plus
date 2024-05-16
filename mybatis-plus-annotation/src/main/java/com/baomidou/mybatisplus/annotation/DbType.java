@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,9 +119,17 @@ public enum DbType {
     @Deprecated
     GBASE_INFORMIX("gbase 8s", "南大通用数据库 GBase 8s"),
     /**
+     * GBase8sPG
+     */
+    GBASE8S_PG("gbase8s-pg", "南大通用数据库 GBase 8s兼容pg"),
+    /**
+     * GBase8c
+     */
+    GBASE_8C("gbase8c", "南大通用数据库 GBase 8c"),
+    /**
      * Sinodb
      */
-    SINODB("sinodb","星瑞格数据库"),
+    SINODB("sinodb", "星瑞格数据库"),
     /**
      * Oscar
      */
@@ -147,13 +155,9 @@ public enum DbType {
      */
     CUBRID("cubrid", "CUBRID数据库"),
     /**
-     * GOLDILOCKS
+     * SUNDB
      */
-    GOLDILOCKS("goldilocks", "GOLDILOCKS数据库"),
-    /**
-     * CSIIDB
-     */
-    CSIIDB("csiidb", "CSIIDB数据库"),
+    SUNDB("sundb", "SUNDB数据库"),
     /**
      * Hana
      */
@@ -195,6 +199,14 @@ public enum DbType {
      */
     LEALONE("lealone", "Lealone数据库"),
     /**
+     * trino
+     */
+    TRINO("trino", "Trino数据库"),
+    /**
+     * presto
+     */
+    PRESTO("presto", "Presto数据库"),
+    /**
      * UNKNOWN DB
      */
     OTHER("other", "其他数据库");
@@ -220,5 +232,43 @@ public enum DbType {
             }
         }
         return OTHER;
+    }
+
+    public boolean mysqlSameType() {
+        return this == DbType.MYSQL
+            || this == DbType.MARIADB
+            || this == DbType.GBASE
+            || this == DbType.OSCAR
+            || this == DbType.XU_GU
+            || this == DbType.CLICK_HOUSE
+            || this == DbType.OCEAN_BASE
+            || this == DbType.CUBRID
+            || this == DbType.SUNDB;
+    }
+
+    public boolean oracleSameType() {
+        return this == DbType.ORACLE
+            || this == DbType.DM
+            || this == DbType.GAUSS;
+    }
+
+    public boolean postgresqlSameType() {
+        return this == DbType.POSTGRE_SQL
+            || this == DbType.H2
+            || this == DbType.LEALONE
+            || this == DbType.SQLITE
+            || this == DbType.HSQL
+            || this == DbType.KINGBASE_ES
+            || this == DbType.PHOENIX
+            || this == DbType.SAP_HANA
+            || this == DbType.IMPALA
+            || this == DbType.HIGH_GO
+            || this == DbType.VERTICA
+            || this == DbType.REDSHIFT
+            || this == DbType.OPENGAUSS
+            || this == DbType.TDENGINE
+            || this == DbType.UXDB
+            || this == DbType.GBASE8S_PG
+            || this == DbType.GBASE_8C;
     }
 }

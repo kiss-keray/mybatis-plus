@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ import java.io.File;
 import java.io.IOException;
 
 /**
+ * 文件处理工具类 {@link FileUtils}
  *
  * @since 3.5.0
- * @see org.apache.commons.io.FileUtils
  */
 public class FileUtils {
 

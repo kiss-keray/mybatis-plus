@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import com.baomidou.mybatisplus.generator.config.StrategyConfig;
 import com.baomidou.mybatisplus.generator.config.po.TableInfo;
 import com.baomidou.mybatisplus.generator.function.ConverterFileName;
 import com.baomidou.mybatisplus.generator.util.ClassUtils;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -49,6 +50,7 @@ public class Controller implements ITemplate {
      *      <code>@Controller</code> -> <code>@RestController</code>
      * </pre>
      */
+    @Getter
     private boolean restStyle;
 
     /**
@@ -57,6 +59,7 @@ public class Controller implements ITemplate {
      *      <code>@RequestMapping("/managerUserActionHistory")</code> -> <code>@RequestMapping("/manager-user-action-history")</code>
      * </pre>
      */
+    @Getter
     private boolean hyphenStyle;
 
     /**
@@ -76,15 +79,23 @@ public class Controller implements ITemplate {
      *
      * @since 3.5.2
      */
+    @Getter
     private boolean fileOverride;
 
-    public boolean isRestStyle() {
-        return restStyle;
-    }
+    /**
+     * 是否生成
+     *
+     * @since 3.5.6
+     */
+    @Getter
+    private boolean generate = true;
 
-    public boolean isHyphenStyle() {
-        return hyphenStyle;
-    }
+    /**
+     * 模板路径
+     * @since 3.5.6
+     */
+    @Getter
+    private String templatePath = ConstVal.TEMPLATE_CONTROLLER;
 
     @Nullable
     public String getSuperClass() {
@@ -94,10 +105,6 @@ public class Controller implements ITemplate {
     @NotNull
     public ConverterFileName getConverterFileName() {
         return converterFileName;
-    }
-
-    public boolean isFileOverride() {
-        return fileOverride;
     }
 
     @Override
@@ -205,6 +212,29 @@ public class Controller implements ITemplate {
          */
         public Builder enableFileOverride() {
             this.controller.fileOverride = true;
+            return this;
+        }
+
+        /**
+         * 禁用生成
+         *
+         * @return this
+         * @since 3.5.6
+         */
+        public Builder disable() {
+            this.controller.generate = false;
+            return this;
+        }
+
+        /**
+         * 指定模板路径
+         *
+         * @param template 模板路径
+         * @return this
+         * @since 3.5.6
+         */
+        public Builder template(@NotNull String template) {
+            this.controller.templatePath = template;
             return this;
         }
 

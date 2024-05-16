@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, baomidou (jobob@qq.com).
+ * Copyright (c) 2011-2024, baomidou (jobob@qq.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import com.baomidou.mybatisplus.generator.config.StrategyConfig;
 import com.baomidou.mybatisplus.generator.config.po.TableInfo;
 import com.baomidou.mybatisplus.generator.function.ConverterFileName;
 import com.baomidou.mybatisplus.generator.util.ClassUtils;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,35 @@ public class Service implements ITemplate {
 
     private Service() {
     }
+
+    /**
+     * 是否生成serviceImpl
+     *
+     * @since 3.5.6
+     */
+    @Getter
+    private boolean generateServiceImpl = true;
+
+
+    /**
+     * 是否生成service
+     *
+     * @since 3.5.6
+     */
+    @Getter
+    private boolean generateService = true;
+
+    /**
+     * @since 3.5.6
+     */
+    @Getter
+    private String serviceTemplate = ConstVal.TEMPLATE_SERVICE;
+
+    /**
+     * @since 3.5.6
+     */
+    @Getter
+    private String serviceImplTemplate = ConstVal.TEMPLATE_SERVICE_IMPL;
 
     /**
      * 自定义继承的Service类全称，带包名
@@ -80,6 +110,7 @@ public class Service implements ITemplate {
      *
      * @since 3.5.2
      */
+    @Getter
     private boolean fileOverride;
 
     @NotNull
@@ -92,10 +123,6 @@ public class Service implements ITemplate {
         return converterServiceImplFileName;
     }
 
-    public boolean isFileOverride() {
-        return fileOverride;
-    }
-
     @Override
     @NotNull
     public Map<String, Object> renderData(@NotNull TableInfo tableInfo) {
@@ -104,6 +131,8 @@ public class Service implements ITemplate {
         data.put("superServiceClass", ClassUtils.getSimpleName(this.superServiceClass));
         data.put("superServiceImplClassPackage", this.superServiceImplClass);
         data.put("superServiceImplClass", ClassUtils.getSimpleName(this.superServiceImplClass));
+        data.put("generateServiceImpl", this.generateServiceImpl);
+        data.put("generateService", this.generateService);
         return data;
     }
 
@@ -220,6 +249,62 @@ public class Service implements ITemplate {
          */
         public Builder enableFileOverride() {
             this.service.fileOverride = true;
+            return this;
+        }
+
+        /**
+         * 禁用生成Service
+         *
+         * @return this
+         * @since 3.5.6
+         */
+        public Builder disable() {
+            this.service.generateService = false;
+            this.service.generateServiceImpl = false;
+            return this;
+        }
+
+        /**
+         * 禁用生成
+         *
+         * @return this
+         * @since 3.5.6
+         */
+        public Builder disableService() {
+            this.service.generateService = false;
+            return this;
+        }
+
+        /**
+         * 禁用生成ServiceImpl
+         *
+         * @return this
+         * @since 3.5.6
+         */
+        public Builder disableServiceImpl() {
+            this.service.generateServiceImpl = false;
+            return this;
+        }
+
+        /**
+         * Service模板路径
+         *
+         * @return this
+         * @since 3.5.6
+         */
+        public Builder serviceTemplate(@NotNull String template) {
+            this.service.serviceTemplate = template;
+            return this;
+        }
+
+        /**
+         * ServiceImpl模板路径
+         *
+         * @return this
+         * @since 3.5.6
+         */
+        public Builder serviceImplTemplate(@NotNull String template) {
+            this.service.serviceImplTemplate = template;
             return this;
         }
 
