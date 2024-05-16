@@ -35,7 +35,10 @@ public class ConfigBuilder {
 
     /**
      * 模板路径配置信息
+     *
+     * @deprecated 3.5.6
      */
+    @Deprecated
     private final TemplateConfig templateConfig;
 
     /**
@@ -141,7 +144,14 @@ public class ConfigBuilder {
         return this;
     }
 
+    /**
+     * 获取模板配置
+     *
+     * @return 模板配置
+     * @deprecated 3.5.6 {@link #strategyConfig}
+     */
     @NotNull
+    @Deprecated
     public TemplateConfig getTemplateConfig() {
         return templateConfig;
     }

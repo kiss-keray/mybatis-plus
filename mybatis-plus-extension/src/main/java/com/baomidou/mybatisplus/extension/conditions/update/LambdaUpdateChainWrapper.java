@@ -18,7 +18,6 @@ package com.baomidou.mybatisplus.extension.conditions.update;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.Update;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.toolkit.ExceptionUtils;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.conditions.AbstractChainWrapper;
 
@@ -28,7 +27,6 @@ import com.baomidou.mybatisplus.extension.conditions.AbstractChainWrapper;
  * @author miemie
  * @since 2018-12-19
  */
-@SuppressWarnings({"serial"})
 public class LambdaUpdateChainWrapper<T> extends AbstractChainWrapper<T, SFunction<T, ?>, LambdaUpdateChainWrapper<T>, LambdaUpdateWrapper<T>>
     implements ChainUpdate<T>, Update<LambdaUpdateChainWrapper<T>, SFunction<T, ?>> {
 
@@ -58,9 +56,59 @@ public class LambdaUpdateChainWrapper<T> extends AbstractChainWrapper<T, SFuncti
         return typedThis;
     }
 
-    @Override
-    public String getSqlSet() {
-        throw ExceptionUtils.mpe("can not use this method for \"%s\"", "getSqlSet");
+    /**
+     * 字段自增变量 val 值
+     *
+     * @param column 字段
+     * @param val    值
+     * @return this
+     * @since 3.5.6
+     */
+    public LambdaUpdateChainWrapper<T> setIncrBy(SFunction<T, ?> column, Number val) {
+        wrapperChildren.setIncrBy(column, val);
+        return typedThis;
+    }
+
+
+    /**
+     * 字段自增变量 val 值
+     *
+     * @param condition 条件
+     * @param column    字段
+     * @param val       值
+     * @return this
+     * @since 3.5.6
+     */
+    public LambdaUpdateChainWrapper<T> setIncrBy(boolean condition, SFunction<T, ?> column, Number val) {
+        wrapperChildren.setIncrBy(condition, column, val);
+        return typedThis;
+    }
+
+    /**
+     * 字段自减变量 val 值
+     *
+     * @param column 字段
+     * @param val    值
+     * @return this
+     * @since 3.5.6
+     */
+    public LambdaUpdateChainWrapper<T> setDecrBy(SFunction<T, ?> column, Number val) {
+        wrapperChildren.setDecrBy(column, val);
+        return typedThis;
+    }
+
+    /**
+     * 字段自减变量 val 值
+     *
+     * @param condition 条件
+     * @param column    字段
+     * @param val       值
+     * @return this
+     * @since 3.5.6
+     */
+    public LambdaUpdateChainWrapper<T> setDecrBy(boolean condition, SFunction<T, ?> column, Number val) {
+        wrapperChildren.setDecrBy(condition, column, val);
+        return typedThis;
     }
 
     @Override

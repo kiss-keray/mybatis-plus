@@ -27,7 +27,6 @@ import org.apache.ibatis.exceptions.TooManyResultsException;
 import org.apache.ibatis.session.ResultHandler;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -117,8 +116,7 @@ public interface BaseMapper<T> extends Mapper<T> {
      * @param columnMap 表字段 map 对象
      */
     default int deleteByMap(Map<String, Object> columnMap) {
-        QueryWrapper<T> qw = Wrappers.query();
-        return this.delete(qw.allEq(columnMap));
+        return this.delete(Wrappers.<T>query().allEq(columnMap));
     }
 
     /**
@@ -145,13 +143,14 @@ public interface BaseMapper<T> extends Mapper<T> {
     /**
      * 根据 whereEntity 条件，更新记录
      *
-     * @param entity        实体对象 (set 条件值,可以为 null)
+     * @param entity        实体对象 (set 条件值,可以为 null,当entity为null时,无法进行自动填充)
      * @param updateWrapper 实体对象封装操作类（可以为 null,里面的 entity 用于生成 where 语句）
      */
     int update(@Param(Constants.ENTITY) T entity, @Param(Constants.WRAPPER) Wrapper<T> updateWrapper);
 
     /**
      * 根据 Wrapper 更新记录
+     * <p>此方法无法进行自动填充,如需自动填充请使用{@link #update(Object, Wrapper)}</p>
      *
      * @param updateWrapper {@link UpdateWrapper} or {@link LambdaUpdateWrapper}
      * @since 3.5.4
@@ -189,8 +188,7 @@ public interface BaseMapper<T> extends Mapper<T> {
      * @param columnMap 表字段 map 对象
      */
     default List<T> selectByMap(Map<String, Object> columnMap) {
-        QueryWrapper<T> qw = Wrappers.query();
-        return this.selectList(qw.allEq(columnMap));
+        return this.selectList(Wrappers.<T>query().allEq(columnMap));
     }
 
     /**
@@ -222,21 +220,13 @@ public interface BaseMapper<T> extends Mapper<T> {
      * @param throwEx      boolean 参数，为true如果存在多个结果直接抛出异常
      */
     default T selectOne(@Param(Constants.WRAPPER) Wrapper<T> queryWrapper, boolean throwEx) {
-        List<T> list = new ArrayList<>();
-        //TODO 后期配合Page参数可以做数据库分页,下面的换成RowBounds做限制结果集也行
-        this.selectList(queryWrapper, resultContext -> {
-            T resultObject = resultContext.getResultObject();
-            list.add(resultObject);
-            if (!throwEx || resultContext.getResultCount() > 1) {
-                resultContext.stop();
-            }
-        });
+        List<T> list = this.selectList(queryWrapper);
         int size = list.size();
         if (size == 1) {
             return list.get(0);
         } else if (size > 1) {
             if (throwEx) {
-                throw new TooManyResultsException("Expected one result (or null) to be returned by selectOne(), but found multiple records");
+                throw new TooManyResultsException("Expected one result (or null) to be returned by selectOne(), but found: " + size);
             }
             return list.get(0);
         }
@@ -356,8 +346,7 @@ public interface BaseMapper<T> extends Mapper<T> {
      * @param queryWrapper 实体对象封装操作类（可以为 null）
      */
     default <P extends IPage<T>> P selectPage(P page, @Param(Constants.WRAPPER) Wrapper<T> queryWrapper) {
-        List<T> list = selectList(page, queryWrapper);
-        page.setRecords(list);
+        page.setRecords(selectList(page, queryWrapper));
         return page;
     }
 
@@ -368,8 +357,7 @@ public interface BaseMapper<T> extends Mapper<T> {
      * @param queryWrapper 实体对象封装操作类
      */
     default <P extends IPage<Map<String, Object>>> P selectMapsPage(P page, @Param(Constants.WRAPPER) Wrapper<T> queryWrapper) {
-        List<Map<String, Object>> list = selectMaps(page, queryWrapper);
-        page.setRecords(list);
+        page.setRecords(selectMaps(page, queryWrapper));
         return page;
     }
 

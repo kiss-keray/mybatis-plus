@@ -23,12 +23,14 @@ import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.generator.IFill;
 import com.baomidou.mybatisplus.generator.ITemplate;
+import com.baomidou.mybatisplus.generator.config.ConstVal;
 import com.baomidou.mybatisplus.generator.config.INameConvert;
 import com.baomidou.mybatisplus.generator.config.StrategyConfig;
 import com.baomidou.mybatisplus.generator.config.po.TableInfo;
 import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 import com.baomidou.mybatisplus.generator.function.ConverterFileName;
 import com.baomidou.mybatisplus.generator.util.ClassUtils;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -57,6 +59,20 @@ public class Entity implements ITemplate {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Entity.class);
 
+    /**
+     * Java模板默认路径
+     *
+     * @since 3.5.6
+     */
+    @Getter
+    private String javaTemplate = ConstVal.TEMPLATE_ENTITY_JAVA;
+
+    /**
+     * Kotlin模板默认撸
+     */
+    @Getter
+    private String kotlinTemplate = ConstVal.TEMPLATE_ENTITY_KT;
+
     private Entity() {
     }
 
@@ -73,17 +89,19 @@ public class Entity implements ITemplate {
     /**
      * 自定义基础的Entity类，公共字段
      */
+    @Getter
     private final Set<String> superEntityColumns = new HashSet<>();
 
     /**
      * 自定义忽略字段
-     * https://github.com/baomidou/generator/issues/46
+     * <a href="https://github.com/baomidou/generator/issues/46">...</a>
      */
     private final Set<String> ignoreColumns = new HashSet<>();
 
     /**
      * 实体是否生成 serialVersionUID
      */
+    @Getter
     private boolean serialVersionUID = true;
 
     /**
@@ -91,6 +109,7 @@ public class Entity implements ITemplate {
      * -----------------------------------<br>
      * public static final String ID = "test_id";
      */
+    @Getter
     private boolean columnConstant;
 
     /**
@@ -98,23 +117,27 @@ public class Entity implements ITemplate {
      *
      * @since 3.3.2
      */
+    @Getter
     private boolean chain;
 
     /**
      * 【实体】是否为lombok模型（默认 false）<br>
      * <a href="https://projectlombok.org/">document</a>
      */
+    @Getter
     private boolean lombok;
 
     /**
      * Boolean类型字段是否移除is前缀（默认 false）<br>
      * 比如 : 数据库字段名称 : 'is_xxx',类型为 : tinyint. 在映射实体的时候则会去掉is,在实体类中映射最终结果为 xxx
      */
+    @Getter
     private boolean booleanColumnRemoveIsPrefix;
 
     /**
      * 是否生成实体时，生成字段注解（默认 false）
      */
+    @Getter
     private boolean tableFieldAnnotationEnable;
 
     /**
@@ -166,6 +189,7 @@ public class Entity implements ITemplate {
      *
      * @since 3.5.0
      */
+    @Getter
     private boolean activeRecord;
 
     /**
@@ -187,7 +211,17 @@ public class Entity implements ITemplate {
      *
      * @since 3.5.2
      */
+    @Getter
     private boolean fileOverride;
+
+
+    /**
+     * 是否生成
+     *
+     * @since 3.5.6
+     */
+    @Getter
+    private boolean generate = true;
 
     /**
      * <p>
@@ -253,34 +287,6 @@ public class Entity implements ITemplate {
         return superClass;
     }
 
-    public Set<String> getSuperEntityColumns() {
-        return this.superEntityColumns;
-    }
-
-    public boolean isSerialVersionUID() {
-        return serialVersionUID;
-    }
-
-    public boolean isColumnConstant() {
-        return columnConstant;
-    }
-
-    public boolean isChain() {
-        return chain;
-    }
-
-    public boolean isLombok() {
-        return lombok;
-    }
-
-    public boolean isBooleanColumnRemoveIsPrefix() {
-        return booleanColumnRemoveIsPrefix;
-    }
-
-    public boolean isTableFieldAnnotationEnable() {
-        return tableFieldAnnotationEnable;
-    }
-
     @Nullable
     public String getVersionColumnName() {
         return versionColumnName;
@@ -311,10 +317,6 @@ public class Entity implements ITemplate {
         return naming;
     }
 
-    public boolean isActiveRecord() {
-        return activeRecord;
-    }
-
     @Nullable
     public IdType getIdType() {
         return idType;
@@ -323,10 +325,6 @@ public class Entity implements ITemplate {
     @NotNull
     public ConverterFileName getConverterFileName() {
         return converterFileName;
-    }
-
-    public boolean isFileOverride() {
-        return fileOverride;
     }
 
     @Override
@@ -640,6 +638,41 @@ public class Entity implements ITemplate {
          */
         public Builder enableFileOverride() {
             this.entity.fileOverride = true;
+            return this;
+        }
+
+        /**
+         * 指定模板路径
+         *
+         * @param template 模板路径
+         * @return this
+         * @since 3.5.6
+         */
+        public Builder javaTemplate(String template) {
+            this.entity.javaTemplate = template;
+            return this;
+        }
+
+        /**
+         * 指定模板路径
+         *
+         * @param template 模板路径
+         * @return this
+         * @since 3.5.6
+         */
+        public Builder kotlinTemplatePath(String template) {
+            this.entity.kotlinTemplate = template;
+            return this;
+        }
+
+        /**
+         * 禁用实体生成
+         *
+         * @return this
+         * @since 3.5.6
+         */
+        public Builder disable() {
+            this.entity.generate = false;
             return this;
         }
 

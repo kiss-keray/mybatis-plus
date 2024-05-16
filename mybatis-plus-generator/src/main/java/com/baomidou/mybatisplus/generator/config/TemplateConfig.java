@@ -16,6 +16,11 @@
 package com.baomidou.mybatisplus.generator.config;
 
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.generator.config.builder.Controller;
+import com.baomidou.mybatisplus.generator.config.builder.Entity;
+import com.baomidou.mybatisplus.generator.config.builder.Service;
+import com.baomidou.mybatisplus.generator.config.builder.Mapper;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +29,14 @@ import org.slf4j.LoggerFactory;
  * 模板路径配置项
  *
  * @author tzg hubin
+ * @see StrategyConfig.Builder#entityBuilder()
+ * @see StrategyConfig.Builder#serviceBuilder()
+ * @see StrategyConfig.Builder#mapperBuilder()
+ * @see StrategyConfig.Builder#controllerBuilder()
  * @since 2017-06-17
+ * @deprecated 3.5.6 {@link StrategyConfig}
  */
+@Deprecated
 public class TemplateConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TemplateConfig.class);
@@ -43,26 +54,31 @@ public class TemplateConfig {
     /**
      * 设置控制器模板路径
      */
+    @Getter
     private String controller;
 
     /**
      * 设置Mapper模板路径
      */
+    @Getter
     private String mapper;
 
     /**
      * 设置MapperXml模板路径
      */
+    @Getter
     private String xml;
 
     /**
      * 设置Service模板路径
      */
+    @Getter
     private String service;
 
     /**
      * 设置ServiceImpl模板路径
      */
+    @Getter
     private String serviceImpl;
 
     /**
@@ -116,10 +132,20 @@ public class TemplateConfig {
      *
      * @param templateTypes 模板类型
      * @return this
+     * @see Entity.Builder#disable()
+     * @see Service.Builder#disable()
+     * @see Service.Builder#disableService()
+     * @see Service.Builder#disableServiceImpl()
+     * @see Controller.Builder#disable()
+     * @see Mapper.Builder#disable()
+     * @see Mapper.Builder#disableMapper()
+     * @see Mapper.Builder#disableMapperXml()
      * @since 3.3.2
+     * @deprecated 3.5.6
      */
+    @Deprecated
     public TemplateConfig disable(@NotNull TemplateType... templateTypes) {
-        if (templateTypes != null && templateTypes.length > 0) {
+        if (templateTypes != null) {
             for (TemplateType templateType : templateTypes) {
                 switch (templateType) {
                     case ENTITY:
@@ -154,37 +180,29 @@ public class TemplateConfig {
      * 禁用全部模板
      *
      * @return this
+     * @see Entity.Builder#disable()
+     * @see Service.Builder#disable()
+     * @see Service.Builder#disableService()
+     * @see Service.Builder#disableServiceImpl()
+     * @see Controller.Builder#disable()
+     * @see Mapper.Builder#disable()
+     * @see Mapper.Builder#disableMapper()
+     * @see Mapper.Builder#disableMapperXml()
      * @since 3.5.0
+     * @deprecated 3.5.6
      */
+    @Deprecated
     public TemplateConfig disable() {
         return disable(TemplateType.values());
-    }
-
-    public String getService() {
-        return service;
-    }
-
-    public String getServiceImpl() {
-        return serviceImpl;
-    }
-
-    public String getMapper() {
-        return mapper;
-    }
-
-    public String getXml() {
-        return xml;
-    }
-
-    public String getController() {
-        return controller;
     }
 
     /**
      * 模板路径配置构建者
      *
      * @author nieqiurong 3.5.0
+     * @deprecated 3.5.6 {@link StrategyConfig}
      */
+    @Deprecated
     public static class Builder implements IConfigBuilder<TemplateConfig> {
 
         private final TemplateConfig templateConfig;
@@ -221,7 +239,9 @@ public class TemplateConfig {
          *
          * @param entityTemplate 实体模板
          * @return this
+         * @deprecated {@link Entity.Builder#javaTemplate}
          */
+        @Deprecated
         public Builder entity(@NotNull String entityTemplate) {
             this.templateConfig.disableEntity = false;
             this.templateConfig.entity = entityTemplate;
@@ -233,7 +253,9 @@ public class TemplateConfig {
          *
          * @param entityKtTemplate 实体模板
          * @return this
+         * @deprecated {@link Entity.Builder#javaTemplate}
          */
+        @Deprecated
         public Builder entityKt(@NotNull String entityKtTemplate) {
             this.templateConfig.disableEntity = false;
             this.templateConfig.entityKt = entityKtTemplate;
@@ -243,9 +265,11 @@ public class TemplateConfig {
         /**
          * 设置service模板路径
          *
-         * @param serviceTemplate     service接口模板路径
+         * @param serviceTemplate service接口模板路径
          * @return this
+         * @deprecated {@link Service.Builder#serviceTemplate(String)}
          */
+        @Deprecated
         public Builder service(@NotNull String serviceTemplate) {
             this.templateConfig.service = serviceTemplate;
             return this;
@@ -256,7 +280,9 @@ public class TemplateConfig {
          *
          * @param serviceImplTemplate service实现类模板路径
          * @return this
+         * @deprecated {@link Service.Builder#serviceImplTemplate(String)}
          */
+        @Deprecated
         public Builder serviceImpl(@NotNull String serviceImplTemplate) {
             this.templateConfig.serviceImpl = serviceImplTemplate;
             return this;
@@ -267,7 +293,9 @@ public class TemplateConfig {
          *
          * @param mapperTemplate mapper模板路径
          * @return this
+         * @deprecated {@link Mapper.Builder#mapperTemplate(String)}
          */
+        @Deprecated
         public Builder mapper(@NotNull String mapperTemplate) {
             this.templateConfig.mapper = mapperTemplate;
             return this;
@@ -278,7 +306,9 @@ public class TemplateConfig {
          *
          * @param xmlTemplate xml模板路径
          * @return this
+         * @deprecated {@link Mapper.Builder#mapperXmlTemplate(String)}
          */
+        @Deprecated
         public Builder xml(@NotNull String xmlTemplate) {
             this.templateConfig.xml = xmlTemplate;
             return this;
@@ -289,7 +319,9 @@ public class TemplateConfig {
          *
          * @param controllerTemplate 控制器模板路径
          * @return this
+         * @deprecated {@link Controller.Builder#template(String)}
          */
+        @Deprecated
         public Builder controller(@NotNull String controllerTemplate) {
             this.templateConfig.controller = controllerTemplate;
             return this;

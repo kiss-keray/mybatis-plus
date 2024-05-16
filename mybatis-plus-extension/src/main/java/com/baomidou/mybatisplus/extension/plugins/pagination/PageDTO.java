@@ -26,6 +26,7 @@ import java.util.List;
  * @since 2021-05-20
  */
 public class PageDTO<T> extends Page<T> {
+
     private static final long serialVersionUID = 1L;
 
     public PageDTO() {
@@ -47,35 +48,6 @@ public class PageDTO<T> extends Page<T> {
         super(current, size, total, searchCount);
     }
 
-    @Override
-    public String getCountId() {
-        return this.countId;
-    }
-
-    @Override
-    public Long getMaxLimit() {
-        return this.maxLimit;
-    }
-
-    @Override
-    public List<OrderItem> getOrders() {
-        return this.orders;
-    }
-
-    @Override
-    public boolean isOptimizeCountSql() {
-        return this.optimizeCountSql;
-    }
-
-    public boolean isOptimizeJoinOfCountSql() {
-        return this.optimizeJoinOfCountSql;
-    }
-
-    @Override
-    public boolean isSearchCount() {
-        return this.searchCount;
-    }
-
     /* --------------- 以下为静态构造方式 --------------- */
     public static <T> Page<T> of(long current, long size) {
         return of(current, size, 0);
@@ -92,4 +64,25 @@ public class PageDTO<T> extends Page<T> {
     public static <T> Page<T> of(long current, long size, long total, boolean searchCount) {
         return new PageDTO<>(current, size, total, searchCount);
     }
+
+    public String getCountId() {
+        return this.countId;
+    }
+
+    public Long getMaxLimit() {
+        return this.maxLimit;
+    }
+
+    public List<OrderItem> getOrders() {
+        return this.orders;
+    }
+
+    public boolean isOptimizeCountSql() {
+        return this.optimizeCountSql;
+    }
+
+    public boolean isSearchCount() {
+        return this.searchCount;
+    }
+
 }

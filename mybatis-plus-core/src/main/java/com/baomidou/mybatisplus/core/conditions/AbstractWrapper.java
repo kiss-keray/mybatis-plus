@@ -310,6 +310,12 @@ public abstract class AbstractWrapper<T, R, Children extends AbstractWrapper<T, 
     }
 
     @Override
+    public Children eqSql(boolean condition, R column, String eqValue) {
+        return maybeDo(condition, () -> appendSqlSegments(columnToSqlSegment(column), EQ,
+            () -> String.format("(%s)", eqValue)));
+    }
+
+    @Override
     public Children inSql(boolean condition, R column, String inValue) {
         return maybeDo(condition, () -> appendSqlSegments(columnToSqlSegment(column), IN,
             () -> String.format("(%s)", inValue)));
@@ -362,7 +368,7 @@ public abstract class AbstractWrapper<T, R, Children extends AbstractWrapper<T, 
                 one = columnToString(column);
             }
             if (CollectionUtils.isNotEmpty(columns)) {
-                one += (StringPool.COMMA + columnsToString(columns));
+                one += column != null ? StringPool.COMMA + columnsToString(columns) : columnsToString(columns);
             }
             final String finalOne = one;
             appendSqlSegments(GROUP_BY, () -> finalOne);
@@ -622,7 +628,7 @@ public abstract class AbstractWrapper<T, R, Children extends AbstractWrapper<T, 
     @Override
     public String getSqlComment() {
         if (StringUtils.isNotBlank(sqlComment.getStringValue())) {
-            return "/*" + StringEscape.escapeRawString(sqlComment.getStringValue()) + "*/";
+            return "/*" + sqlComment.getStringValue() + "*/";
         }
         return null;
     }
@@ -630,7 +636,7 @@ public abstract class AbstractWrapper<T, R, Children extends AbstractWrapper<T, 
     @Override
     public String getSqlFirst() {
         if (StringUtils.isNotBlank(sqlFirst.getStringValue())) {
-            return StringEscape.escapeRawString(sqlFirst.getStringValue());
+            return sqlFirst.getStringValue();
         }
         return null;
     }
